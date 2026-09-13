@@ -39,8 +39,8 @@ deliberate callback near the end (scrolling back up after the keeper push, clear
 > oracle and derates or halts their fill. Right now this maker's exposure gauge reads 10% —
 > safe."
 
-**[Already on screen after scroll: Aggregate Exposure panel → "Maker exposure" section with the
-Exposure Gauge, reading 10%]**
+**[Already on screen after scroll: "Why this maker is exposure-gated" panel → "Maker exposure"
+section with the Exposure Gauge, reading 10%]**
 
 ### 1:25–1:45 (20s) — Cross-venue proof (predicted, not yet executed)
 
@@ -49,8 +49,8 @@ Exposure Gauge, reading 10%]**
 > venues, and the predicted output is bit-for-bit identical whether it fills through SwapVM or
 > through Uniswap v4. We'll prove that for real with actual swaps in a minute."
 
-**[Scroll to Cross-Venue Proof panel — the "✓ EXACT MATCH — BIT-EXACT" badge is already showing,
-no click needed]**
+**[Scroll to "Same strategy. Same risk policy. Different execution venue." — the
+"✓ EXACT MATCH — BIT-EXACT" badge is already showing, no click needed]**
 
 ### 1:45–2:20 (35s) — The Graph: live verdict, exposure history, pool activity, MCP
 
@@ -61,8 +61,8 @@ no click needed]**
 > works here. And the same data is available to an AI agent over MCP — it can just ask 'is this
 > maker safe?' and get a real answer, no GraphQL required."
 
-**[Scroll past Graph Verdict Banner → Graph Exposure Panel → Graph Pool Activity panel → cut to
-a terminal running a saved MCP tool-call input, showing the response]**
+**[Scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity, from The Graph
+(Messari shape)" → cut to a terminal running a saved MCP tool-call input, showing the response]**
 
 ### 2:20–2:50 (30s) — Actually swap on both venues
 
@@ -72,8 +72,8 @@ a terminal running a saved MCP tool-call input, showing the response]**
 > predicted — because the v4 pool has zero liquidity of its own, every fill comes from that same
 > Aqua strategy."
 
-**[Scroll to the SwapVM / Uniswap v4 panel row → click Swap on each → point back at the matching
-output amounts]**
+**[Scroll to the "Swap directly via SwapVM" / "Swap via Uniswap v4" row → click Swap on each →
+point back at the matching output amounts]**
 
 ### 2:50–3:25 (35s) — Strategy P + the dynamic-fee pool
 
@@ -84,17 +84,18 @@ output amounts]**
 > the predicted fee next to the persisted on-chain fee — I'll hit refresh — [click] — a real
 > transaction, no swap required."
 
-**[Scroll to the Strategy P / Dynamic Fee Pool panel row — point at the live Chainlink price,
-then click "Push current fee on-chain" on the dynamic-fee panel]**
+**[Scroll to the "Strategy P (price + risk aware)" / "Risk-adjusted dynamic fee (Uniswap v4)"
+row — point at the live Chainlink price, then click "Push current fee on-chain (refreshFee)" on
+the dynamic-fee panel]**
 
 ### 3:25–3:50 (25s) — Maker emergency pause
 
 > **SAY:**
-> "The maker also has an independent kill switch. [click pause] Now any fill on either venue
-> reverts with the exact expected error. [attempt swap, show revert] Unpausing restores it
-> immediately. [click unpause]"
+> "The maker also has an independent kill switch. [click "Pause (emergency halt)"] Now any fill
+> on either venue reverts with the exact expected error. [attempt swap, show revert] Unpausing
+> restores it immediately. [click "Unpause"]"
 
-**[Scroll to the Risk Policy / Emergency Pause panel row]**
+**[Scroll to the "Maker risk policy" / "Maker emergency halt" row]**
 
 ### 3:50–4:10 (20s) — Keeper pushes real exposure
 
@@ -102,8 +103,8 @@ then click "Push current fee on-chain" on the dynamic-fee panel]**
 > "Last piece: the keeper is what pushes real exposure readings on-chain. Let's push this maker
 > to 70%. [click]"
 
-**[Scroll to the Keeper / Activity Log panel row — click the 70% preset, Activity Log shows the
-real transaction]**
+**[Scroll to the "Keeper control (demo)" / "Activity" row — click the "Derated (70%)" preset
+button, the "Activity" panel shows the real transaction]**
 
 ### 4:10–4:30 (20s) — The one deliberate callback: scroll back up
 
@@ -112,8 +113,8 @@ real transaction]**
 > fills for noticeably less, automatically, because it's the same program reacting to the same
 > new reading."
 
-**[Scroll back up to the Exposure Gauge (now showing "Derated") and/or the SwapVM panel — attempt
-one more swap, show the reduced output]**
+**[Scroll back up to the Exposure Gauge (now showing "Derated") and/or the "Swap directly via
+SwapVM" panel — attempt one more swap, show the reduced output]**
 
 ### 4:30–4:50 (20s) — Test suite proof
 
