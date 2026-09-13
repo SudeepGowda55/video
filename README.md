@@ -1,10 +1,38 @@
 # Aqueduct — 5 Minute Demo Video Script
 
+## Before you hit record — open these tabs, in this order, and pre-paste every query
+
+**Division of labor: Vishruth owns tabs 3–7 (all four Graph tabs, plus the MCP terminal) — he
+opens them, pastes the queries, and clicks Run/executes on his own screen when you cue him. You
+own everything else (tabs 1, 2, 8, 9) and drive those yourself.** Nobody types a URL or pastes a
+query live on camera — everything below is pre-loaded before recording starts.
+
+| Tab | Owner | URL | Pre-paste this query into it, don't run it yet |
+|---|---|---|---|
+| 1 | **You** | `https://aqueduct-protocol.vercel.app/` (wallet connected) | — (this is the main dashboard, used most of the video) |
+| 2 | **You** | `submission-screenshots/multiplier-effect-diagram.html` (the published artifact link) | — |
+| 3 | **Vishruth** | `https://thegraph.com/studio/subgraph/ethonline/` → Playground | `{ exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } }` |
+| 4 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query` (Aave, Ethereum) | `{ protocols(first: 1) { id protocol name slug schemaVersion network type totalValueLockedUSD cumulativeUniqueUsers } markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD inputToken { symbol name } } }` |
+| 5 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query` (Uniswap, Base) | `{ liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD cumulativeVolumeUSD } }` |
+| 6 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query` (Agent0, Base) | `{ agentRegistrationFiles(where: {active: true}, first: 2) { agentId name mcpEndpoint } agents(first: 2) { id chainId agentId owner } }` |
+| 7 | **Vishruth** | Terminal, MCP server running, with a saved JSON-RPC input file ready to pipe in | (see 1:45 below for the exact command) |
+| 8 | **You** | Terminal, this repo checked out, ready to run `forge test --summary` | (see 4:30 below) |
+| 9 | **You** | `https://github.com/SudeepGowda55/Aqueduct` (or the README rendered on GitHub) | — |
+
+> Two more subgraph blocks exist but aren't tied to a specific beat below — Vishruth can paste
+> them into Tab 3 if you want extra Playground material to show while narrating:
+> `{ exposureSnapshots(first: 3) { id } }` and `{ liquidityPools(first: 3) { id } }` and
+> `{ swaps(first: 3) { id } }`.
+>
+> WARNING: Studio queries fail on Explorer and Explorer queries fail on Studio — each query above
+> is pre-paired with the one tab it actually works on. Don't cross-paste them.
+
+---
+
 ## 0:00–1:10 — Introduction + the problem (~68 sec, ~170 words)
 
-**[ON SCREEN: title slide, then bring up the diagram —**
-**`submission-screenshots/multiplier-effect-diagram.html`** (open the published artifact link
-full-screen) **— timed to land as you say "each one looks completely safe"]**
+**[Tab 2 — the multiplier-effect diagram, full-screen — timed to land as you say "each one looks
+completely safe"]**
 
 > **SAY:**
 > "Hi, I'm Sudeep, and along with my teammate Vishruth, we built Aqueduct.
@@ -26,7 +54,7 @@ full-screen) **— timed to land as you say "each one looks completely safe"]**
 
 ## 1:10–5:10 — Live execution, following the page top to bottom (4:00, ~600 words)
 
-**[ON SCREEN: open `aqueduct-protocol.vercel.app`, wallet connected, scrolled to the very top]**
+**[Switch to Tab 1 — `aqueduct-protocol.vercel.app`, scrolled to the very top]**
 
 This whole block follows the real page layout in order — no jumping around — with exactly ONE
 deliberate callback near the end (scrolling back up after the keeper push, clearly signposted).
@@ -52,21 +80,52 @@ section with the Exposure Gauge, reading 10%]**
 **[Scroll to "Same strategy. Same risk policy. Different execution venue." — the
 "✓ EXACT MATCH — BIT-EXACT" badge is already showing, no click needed]**
 
-### 1:45–2:20 (35s) — The Graph: owned vs borrowed, live verdict, history, MCP
+### 1:45–2:20 (35s) — The Graph: owned vs. borrowed, live verdict, history, MCP
 
 > **SAY:**
-> "All of this is backed by The Graph. Quick split: we made one small subgraph ourselves — that's ethonline — it tracks this maker 0x5067...132be with ten positions and drives this safety banner live. Here's one live: 100k committed against 1.39M wallet, 1000 bps, status SAFE — that's the 10% gauge. Then we borrow data from big public subgraphs like Aave and Uniswap that other teams maintain — same Messari shape, so the same query works here and there. Below is real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this maker safe?' — no GraphQL needed, no fake numbers."
+> "All of this is backed by The Graph. Quick split: we built one subgraph ourselves — that's
+> `ethonline` — it tracks this maker, `0x5067...132be`, across ten positions and drives this
+> safety banner live. Here's one, live right now: 100k committed against a 1.39 million wallet,
+> 1000 basis points, status SAFE — that's the same 10% you just saw on the gauge. Then we compose
+> with public subgraphs other teams maintain — Aave, Uniswap, Agent0 — using the same
+> Messari-standard shape, so the same query pattern that works on ours works on theirs too. Below
+> that, real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this
+> maker safe?' — no GraphQL, no fake numbers."
 
-**[Show Studio Playground exposurePositions{ committedAmount makerWalletBalance exposureBps status } screenshot, then scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity, from The Graph
-(Messari shape)" → cut to a terminal running a saved MCP tool-call input, showing the response]**
+**[Cue Vishruth for tabs 3–7 in order, you stay on Tab 1 in between his cuts:**
+**1. Cue Vishruth → Tab 3 (Studio Playground) → he clicks Run on the pre-pasted
+   `exposurePositions` query → hold on the result (committedAmount, makerWalletBalance,
+   exposureBps, status) for a beat.**
+**2. Cue Vishruth → Tab 4 (Aave Explorer) → he clicks Run → hold on the `markets` result.**
+**3. Cue Vishruth → Tab 5 (Uniswap Base Explorer) → he clicks Run → hold on the `liquidityPools`
+   result.**
+**4. Cue Vishruth → Tab 6 (Agent0 Base Explorer) → he clicks Run → hold on the `agents` result.**
+**5. Back to you, Tab 1 → scroll past "Maker safety" → "Exposure, from The Graph" → "Pool
+   activity, from The Graph (Messari shape)".**
+**6. Cue Vishruth → Tab 7 (his terminal) → he runs:**
+```
+node mcp/server.js < saved-mcp-input.jsonl
+```
+**→ hold on the `maker_safety_verdict` response for a beat.]**
 
 ### 2:20–2:50 (30s) — Actually swap on both venues
 
-> **SAY:**
-> "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait toast] — 0.42 Aqua out. Now the same size through the Uniswap v4 pool sourced by our custom hook — [click, wait toast] — 0.42 out again. Same output, genuinely executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill comes from that same Aqua strategy. Pause on the two toasts side by side."
+**[Before this beat: on Tab 1, set BOTH swap panels' amount fields to the same value — e.g. 0.42
+— since "Swap directly via SwapVM" defaults to 10 and "Swap via Uniswap v4" defaults to 1, and
+leaving them mismatched will produce two genuinely different outputs, undercutting the point.]**
 
-**[Scroll to the "Swap directly via SwapVM" / "Swap via Uniswap v4" row → click Swap on each →
-hold 1 beat on each confirmation toast → point back at the matching output amounts. If Base Sepolia is slow, cut on toast, do not wait live.]**
+> **SAY:**
+> "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
+> confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
+> sourced by our custom hook — [click, wait for the toast] — same output again. Genuinely
+> executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill
+> comes from that same Aqua strategy."
+
+**[Scroll to the "Swap directly via SwapVM" / "Swap via Uniswap v4" row → click Swap on the
+SwapVM panel → hold one beat on the confirmation toast → click Swap on the Uniswap v4 panel →
+hold one beat on its toast → hold both toasts on screen together so the matching output numbers
+are readable side by side. If Base Sepolia confirmation is slow, cut on the toast rather than
+waiting live.]**
 
 ### 2:50–3:25 (35s) — Strategy P + the dynamic-fee pool
 
@@ -116,8 +175,11 @@ SwapVM" panel — attempt one more swap, show the reduced output]**
 > suites — including a stateful-fuzz invariant suite that ran 128,000 randomized calls checking
 > committed-balance accounting never drifts. All green."
 
-**[Cut to terminal, run `forge test --summary`, let the passing suite table sit on screen for a
-beat before cutting away]**
+**[You switch to Tab 8 (your own terminal) → run:**
+```
+forge test --summary
+```
+**→ let the passing suite table sit on screen for a beat before cutting away]**
 
 ### 4:50–5:10 (20s) — Close
 
@@ -126,111 +188,29 @@ beat before cutting away]**
 > Full developer feedback for Uniswap is in our repo's `FEEDBACK.md`. One risk guarantee, two
 > execution venues, one live data layer connecting them. That's Aqueduct."
 
-**[README or GitHub repo page]**
+**[You switch to Tab 9 — README or GitHub repo page]**
 
 ---
 
 ## Production notes
 
-- Have the terminal for the MCP call ready with a saved JSON-RPC input file so the tool call
-  resolves instantly on camera (avoids dead air waiting on a live subgraph round-trip).
+- Nobody should type a URL or paste a query live on camera — every tab in the checklist above is
+  opened and pre-loaded *before* recording starts. Vishruth drives tabs 3–7 (the four Graph tabs
+  plus his MCP terminal) on his own screen when you cue him; you drive everything else (tabs 1,
+  2, 8, 9) yourself — that's the only live coordination needed for the whole video.
 - The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:25), and the keeper
   push (3:50) are the segments most likely to run long if a transaction confirmation is slow on
   Base Sepolia — consider recording those in a separate take and cutting on the confirmation
   toast rather than waiting live.
-- The whole demo now follows the page top to bottom in one pass, with exactly one deliberate
+- The whole demo follows the page top to bottom in one pass, with exactly one deliberate
   scroll-back-up at 4:10 to show the keeper push taking effect — that's intentional, not a
   mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
   silently.
-- The multiplier-effect diagram for the opening: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
-- Graph proof links for description (only working, verified today):
-  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities
-  - Maker on-chain (working): https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be
-
-## Copy-paste queries — USE ONLY WHERE LABELED
-
-> WARNING: Studio queries FAIL on Explorer and Explorer queries FAIL on Studio. Paste each block ONLY at its URL below.
-
-```graphql
-"USE ONLY at https://thegraph.com/studio/subgraph/ethonline/ > Playground"
-{ makers(first: 5) { id positionIds } }
-```
-
-```graphql
-{
-  exposurePositions(first: 3) {
-    id
-    committedAmount
-    makerWalletBalance
-    exposureBps
-    status
-    updatedAt
-  }
-}
-```
-
-```graphql
-{ exposureSnapshots(first: 3) { id } }
-```
-
-```graphql
-{ liquidityPools(first: 3) { id } }
-```
-
-```graphql
-{ swaps(first: 3) { id } }
-```
-
-## Copy-paste queries (Explorer — borrowed)
-
-Aave ETH: https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query
-```graphql
-{
-  protocols(first: 1) {
-    id
-    protocol
-    name
-    slug
-    schemaVersion
-    network
-    type
-    totalValueLockedUSD
-    cumulativeUniqueUsers
-  }
-  markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) {
-    id
-    name
-    totalValueLockedUSD
-    inputToken { symbol name }
-  }
-}
-```
-
-Uniswap Base: https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query
-```graphql
-{
-  liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) {
-    id
-    name
-    totalValueLockedUSD
-    cumulativeVolumeUSD
-  }
-}
-```
-
-Agent0 Base: https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query
-```graphql
-{
-  agentRegistrationFiles(where: {active: true}, first: 2) {
-    agentId
-    name
-    mcpEndpoint
-  }
-  agents(first: 2) {
-    id
-    chainId
-    agentId
-    owner
-  }
-}
-```
+- The Aave/Uniswap/Agent0 Explorer links (tabs 4–6) are public third-party subgraphs Vishruth
+  verified working on the day this script was written — give them one live check before
+  recording, since external subgraphs can change or move without our control.
+- Graph proof links for the submission description (verified live):
+  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0, deployed, Base
+    Sepolia, synced 100%, 330 entities.
+  - Maker on-chain activity: https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be
+  - The multiplier-effect diagram: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
