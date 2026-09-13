@@ -35,7 +35,7 @@ full-screen) **— timed to land as you say "each one looks completely safe"]**
 > instruction, `_exposureGate1D`, that reads a maker's real aggregate exposure from an on-chain
 > oracle and derates or halts their fill accordingly."
 
-**[Aggregate Exposure panel → Exposure Gauge]**
+**[Aggregate Exposure panel → Exposure Gauge]** Right now, the maker's exposure is 10%.
 
 ### 1:00–1:50 → 1:20–1:50 (30s) — Cross-venue proof
 
