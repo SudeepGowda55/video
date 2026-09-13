@@ -7,17 +7,17 @@ opens them, pastes the queries, and clicks Run/executes on his own screen when y
 own everything else (tabs 1, 2, 8, 9) and drive those yourself.** Nobody types a URL or pastes a
 query live on camera — everything below is pre-loaded before recording starts.
 
-| Tab | Owner | URL | Pre-paste this query into it, don't run it yet |
-|---|---|---|---|
-| 1 | **You** | `https://aqueduct-protocol.vercel.app/` (wallet connected) | — (this is the main dashboard, used most of the video) |
-| 2 | **You** | `submission-screenshots/multiplier-effect-diagram.html` (the published artifact link) | — |
-| 3 | **Vishruth** | `https://thegraph.com/studio/subgraph/ethonline/` → Playground | `{ exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } }` |
-| 4 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query` (Aave, Ethereum) | `{ protocols(first: 1) { id protocol name slug schemaVersion network type totalValueLockedUSD cumulativeUniqueUsers } markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD inputToken { symbol name } } }` |
-| 5 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query` (Uniswap, Base) | `{ liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD cumulativeVolumeUSD } }` |
-| 6 | **Vishruth** | `https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query` (Agent0, Base) | `{ agentRegistrationFiles(where: {active: true}, first: 2) { agentId name mcpEndpoint } agents(first: 2) { id chainId agentId owner } }` |
-| 7 | **Vishruth** | Terminal, MCP server running, with a saved JSON-RPC input file ready to pipe in | (see 1:45 below for the exact command) |
-| 8 | **You** | Terminal, this repo checked out, ready to run `forge test --summary` | (see 4:30 below) |
-| 9 | **You** | `https://github.com/SudeepGowda55/Aqueduct` (or the README rendered on GitHub) | — |
+| Tab | Owner        | URL                                                                                                                | Pre-paste this query into it, don't run it yet                                                                                                                                                                                                            |
+| --- | ------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **You**      | `https://aqueduct-protocol.vercel.app/` (wallet connected)                                                         | — (this is the main dashboard, used most of the video)                                                                                                                                                                                                    |
+| 2   | **You**      | `submission-screenshots/multiplier-effect-diagram.html` (the published artifact link)                              | —                                                                                                                                                                                                                                                         |
+| 3   | **Vishruth** | `https://thegraph.com/studio/subgraph/ethonline/` → Playground                                                     | `{ exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } }`                                                                                                                                                  |
+| 4   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query` (Aave, Ethereum) | `{ protocols(first: 1) { id protocol name slug schemaVersion network type totalValueLockedUSD cumulativeUniqueUsers } markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD inputToken { symbol name } } }` |
+| 5   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query` (Uniswap, Base)  | `{ liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD cumulativeVolumeUSD } }`                                                                                                                    |
+| 6   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query` (Agent0, Base)   | `{ agentRegistrationFiles(where: {active: true}, first: 2) { agentId name mcpEndpoint } agents(first: 2) { id chainId agentId owner } }`                                                                                                                  |
+| 7   | **Vishruth** | Terminal, MCP server running, with a saved JSON-RPC input file ready to pipe in                                    | (see 1:45 below for the exact command)                                                                                                                                                                                                                    |
+| 8   | **You**      | Terminal, this repo checked out, ready to run `forge test --summary`                                               | (see 4:30 below)                                                                                                                                                                                                                                          |
+| 9   | **You**      | `https://github.com/SudeepGowda55/Aqueduct` (or the README rendered on GitHub)                                     | —                                                                                                                                                                                                                                                         |
 
 > Two more subgraph blocks exist but aren't tied to a specific beat below — Vishruth can paste
 > them into Tab 3 if you want extra Playground material to show while narrating:
@@ -55,9 +55,6 @@ completely safe"]**
 ## 1:10–5:10 — Live execution, following the page top to bottom (4:00, ~600 words)
 
 **[Switch to Tab 1 — `aqueduct-protocol.vercel.app`, scrolled to the very top]**
-
-This whole block follows the real page layout in order — no jumping around — with exactly ONE
-deliberate callback near the end (scrolling back up after the keeper push, clearly signposted).
 
 ### 1:10–1:25 (15s) — Orient + name the mechanism
 
@@ -121,9 +118,11 @@ from The Graph (Messari shape)"]**
 > "Below that, real exposure history and real indexed swaps,"
 
 **[Cue Vishruth → Tab 7 (his terminal) → he runs:**
+
 ```
 node mcp/server.js < saved-mcp-input.jsonl
 ```
+
 **→ hold on the `maker_safety_verdict` response]**
 
 > **SAY:**
@@ -136,7 +135,7 @@ before this beat, they already match.]**
 
 > **SAY:**
 > "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
-> confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
+> > confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
 > sourced by our custom hook — [click, wait for the toast] — same output again. Genuinely
 > executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill
 > comes from that same Aqua strategy."
@@ -196,9 +195,11 @@ SwapVM" panel — attempt one more swap, show the reduced output]**
 > committed-balance accounting never drifts. All green."
 
 **[You switch to Tab 8 (your own terminal) → run:**
+
 ```
 forge test --summary
 ```
+
 **→ let the passing suite table sit on screen for a beat before cutting away]**
 
 ### 4:50–5:10 (20s) — Close
@@ -215,7 +216,7 @@ forge test --summary
 ## Production notes
 
 - Nobody should type a URL or paste a query live on camera — every tab in the checklist above is
-  opened and pre-loaded *before* recording starts. Vishruth drives tabs 3–7 (the four Graph tabs
+  opened and pre-loaded _before_ recording starts. Vishruth drives tabs 3–7 (the four Graph tabs
   plus his MCP terminal) on his own screen when you cue him; you drive everything else (tabs 1,
   2, 8, 9) yourself — that's the only live coordination needed for the whole video.
 - The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:25), and the keeper
