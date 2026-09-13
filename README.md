@@ -24,90 +24,108 @@ full-screen) **— timed to land as you say "each one looks completely safe"]**
 
 ---
 
-## 1:00–4:50 — Live execution + explanation, woven together (3:50, ~575 words)
+## 1:10–5:10 — Live execution, following the page top to bottom (4:00, ~600 words)
 
-**[ON SCREEN: open `aqueduct-protocol.vercel.app`, wallet connected]**
+**[ON SCREEN: open `aqueduct-protocol.vercel.app`, wallet connected, scrolled to the very top]**
 
-### 1:00–1:20 (20s) — Orient + name the mechanism
+This whole block follows the real page layout in order — no jumping around — with exactly ONE
+deliberate callback near the end (scrolling back up after the keeper push, clearly signposted).
+
+### 1:10–1:25 (15s) — Orient + name the mechanism
 
 > **SAY:**
 > "This is Aqueduct, live on Base Sepolia — nothing here is mocked. We added a new SwapVM
-> instruction, `_exposureGate1D`, that reads a maker's real aggregate exposure from an on-chain
-> oracle and derates or halts their fill accordingly."
+> instruction, exposure-gate-one-D, that reads a maker's real aggregate exposure from an on-chain
+> oracle and derates or halts their fill. Right now this maker's exposure gauge reads 10% —
+> safe."
 
-**[Aggregate Exposure panel → Exposure Gauge]** Right now, the maker's exposure is 10%.
+**[Already on screen after scroll: Aggregate Exposure panel → "Maker exposure" section with the
+Exposure Gauge, reading 10%]**
 
-### 1:00–1:50 → 1:20–1:50 (30s) — Cross-venue proof
-
-> **SAY:**
-> "Here's the proof that matters: the same gated strategy backs two execution venues. I'll swap
-> directly through SwapVM — [click] — and now through a Uniswap v4 pool sourced by our custom
-> hook — [click]. Look at the outputs: bit-for-bit identical. Same gate, same math, enforced
-> twice, because the v4 pool has zero liquidity of its own — every fill comes from that same Aqua
-> strategy."
-
-**[SwapVM panel swap → Uniswap v4 panel swap → Cross-Venue Proof "EXACT MATCH — BIT-EXACT" badge]**
-
-### 1:50–2:20 (30s) — Push exposure, watch both venues react
+### 1:25–1:45 (20s) — Cross-venue proof (predicted, not yet executed)
 
 > **SAY:**
-> "Now watch what happens when risk changes. The keeper pushes a higher exposure reading — 70%.
-> [click] The gate derates the fill on both venues identically, because it's the same underlying
-> program running twice, not two systems that happen to agree. Push it high enough and it halts
-> outright — the maker can never trade past what their own program already authorized, even from
-> a malicious oracle reading."
+> "Scrolling down — here's the core claim, computed live: the same strategy backs two execution
+> venues, and the predicted output is bit-for-bit identical whether it fills through SwapVM or
+> through Uniswap v4. We'll prove that for real with actual swaps in a minute."
 
-**[Keeper panel preset → Exposure Gauge updates → one swap showing reduced output]**
+**[Scroll to Cross-Venue Proof panel — the "✓ EXACT MATCH — BIT-EXACT" badge is already showing,
+no click needed]**
 
-### 2:20–2:45 (25s) — Strategy P: composed with a real price oracle
-
-> **SAY:**
-> "This maker also runs a more sophisticated program: price-adjusted and risk-gated together. It
-> reads a real, live Chainlink ETH/USD feed to improve the taker's price, capped, and the
-> exposure gate still applies on top — neither instruction can override the other's direction."
-
-**[Strategy P panel — point at the live Chainlink price]**
-
-### 2:45–3:15 (30s) — Dynamic fee: a second Uniswap capability
+### 1:45–2:20 (35s) — The Graph: live verdict, exposure history, pool activity, MCP
 
 > **SAY:**
-> "Separately, we built a second, independent Uniswap v4 mechanism: a swap fee that scales with
-> this same live exposure, using v4's own dynamic-fee API. Here's the predicted fee from the live
-> oracle, next to the persisted on-chain fee. I'll hit refresh — [click] — that's a real
-> transaction pushing the fee on-chain, no swap required."
+> "All of this is backed by The Graph. This banner is a reasoned safety verdict computed straight
+> from our subgraph. Below it, real exposure history, and real indexed swaps in a
+> Messari-standardized schema — the same query pattern that works on any standard DEX subgraph
+> works here. And the same data is available to an AI agent over MCP — it can just ask 'is this
+> maker safe?' and get a real answer, no GraphQL required."
 
-**[Dynamic Fee Pool panel — click "Push current fee on-chain"]**
+**[Scroll past Graph Verdict Banner → Graph Exposure Panel → Graph Pool Activity panel → cut to
+a terminal running a saved MCP tool-call input, showing the response]**
 
-### 3:15–3:35 (20s) — Maker emergency pause
+### 2:20–2:50 (30s) — Actually swap on both venues
+
+> **SAY:**
+> "Now let's actually do it, for real. Swap directly through SwapVM — [click] — and through the
+> Uniswap v4 pool sourced by our custom hook — [click]. Same output, genuinely executed, not just
+> predicted — because the v4 pool has zero liquidity of its own, every fill comes from that same
+> Aqua strategy."
+
+**[Scroll to the SwapVM / Uniswap v4 panel row → click Swap on each → point back at the matching
+output amounts]**
+
+### 2:50–3:25 (35s) — Strategy P + the dynamic-fee pool
+
+> **SAY:**
+> "This maker also runs a more sophisticated program, reading a real live Chainlink ETH/USD feed
+> to improve pricing, still gated by the same exposure check on top. And separately, a second,
+> independent Uniswap v4 mechanism: a swap fee that scales with this same live exposure. Here's
+> the predicted fee next to the persisted on-chain fee — I'll hit refresh — [click] — a real
+> transaction, no swap required."
+
+**[Scroll to the Strategy P / Dynamic Fee Pool panel row — point at the live Chainlink price,
+then click "Push current fee on-chain" on the dynamic-fee panel]**
+
+### 3:25–3:50 (25s) — Maker emergency pause
 
 > **SAY:**
 > "The maker also has an independent kill switch. [click pause] Now any fill on either venue
 > reverts with the exact expected error. [attempt swap, show revert] Unpausing restores it
 > immediately. [click unpause]"
 
-**[Emergency Pause panel]**
+**[Scroll to the Risk Policy / Emergency Pause panel row]**
 
-### 3:35–4:00 (25s) — The Graph: live verdict + agent tooling
+### 3:50–4:10 (20s) — Keeper pushes real exposure
 
 > **SAY:**
-> "All of this is backed by The Graph. This banner is a reasoned safety verdict computed from our
-> subgraph. Below it, real indexed swaps in a Messari-standardized schema — the same query
-> pattern that works on any standard DEX subgraph works here. And an AI agent can just ask 'is
-> this maker safe?' over MCP and get a real answer."
+> "Last piece: the keeper is what pushes real exposure readings on-chain. Let's push this maker
+> to 70%. [click]"
 
-**[Graph Verdict Banner → Graph Pool Activity panel → terminal running an MCP tool call]**
+**[Scroll to the Keeper / Activity Log panel row — click the 70% preset, Activity Log shows the
+real transaction]**
 
-### 4:00–4:25 (25s) — Test suite proof
+### 4:10–4:30 (20s) — The one deliberate callback: scroll back up
+
+> **SAY:**
+> "Scrolling back up for a second — the gauge already reads derated, and the exact same swap now
+> fills for noticeably less, automatically, because it's the same program reacting to the same
+> new reading."
+
+**[Scroll back up to the Exposure Gauge (now showing "Derated") and/or the SwapVM panel — attempt
+one more swap, show the reduced output]**
+
+### 4:30–4:50 (20s) — Test suite proof
 
 > **SAY:**
 > "And it's backed by real tests, not just a working demo. Forty-nine Foundry tests across ten
 > suites — including a stateful-fuzz invariant suite that ran 128,000 randomized calls checking
-> committed-balance accounting never drifts. [switch to terminal] All green."
+> committed-balance accounting never drifts. All green."
 
-**[Switch to terminal, run `forge test --summary`, let the passing suite table sit on screen for
-a beat before cutting away]**
+**[Cut to terminal, run `forge test --summary`, let the passing suite table sit on screen for a
+beat before cutting away]**
 
-### 4:25–4:50 (25s) — Close
+### 4:50–5:10 (20s) — Close
 
 > **SAY:**
 > "Every number you've seen today is live on Base Sepolia, independently verifiable on-chain.
@@ -122,7 +140,12 @@ a beat before cutting away]**
 
 - Have the terminal for the MCP call ready with a saved JSON-RPC input file so the tool call
   resolves instantly on camera (avoids dead air waiting on a live subgraph round-trip).
-- The two swap transactions (1:20 and 1:50) and the pause/unpause (3:15) are the segments most
-  likely to run long if a transaction confirmation is slow on Base Sepolia — consider recording
-  those in a separate take and cutting on the confirmation toast rather than waiting live.
+- The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:25), and the keeper
+  push (3:50) are the segments most likely to run long if a transaction confirmation is slow on
+  Base Sepolia — consider recording those in a separate take and cutting on the confirmation
+  toast rather than waiting live.
+- The whole demo now follows the page top to bottom in one pass, with exactly one deliberate
+  scroll-back-up at 4:10 to show the keeper push taking effect — that's intentional, not a
+  mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
+  silently.
 - The multiplier-effect diagram for the opening: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
