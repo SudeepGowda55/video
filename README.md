@@ -145,13 +145,89 @@ beat before cutting away]**
 - The multiplier-effect diagram for the opening: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
 - Graph proof links for description (only working, verified today):
   - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities
-  - Maker on-chain (working): https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be — real maker txs
-  - Playground working queries (Studio Playground tab):
-    - { makers(first: 5) { id positionIds } } → 1 maker, 10 positionIds
-    - { exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } } → 1000 bps SAFE
-    - { exposureSnapshots(first: 3) { id } } → history
-    - { liquidityPools(first: 3) { id } } → Messari slice
-    - { swaps(first: 3) { id } } → indexed swaps
-  - Aave ETH (borrowed, working): https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query — paste protocols{ schemaVersion totalValueLockedUSD } → 3.1.0, $24.5B
-  - Uniswap Base (borrowed, working): https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query — paste liquidityPools{ id totalValueLockedUSD } → same shape as ethonline slice
-  - Agent0 Base (borrowed, working): https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query
+  - Maker on-chain (working): https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be
+
+## Copy-paste queries (Studio Playground — ethonline)
+
+```graphql
+{ makers(first: 5) { id positionIds } }
+```
+
+```graphql
+{
+  exposurePositions(first: 3) {
+    id
+    committedAmount
+    makerWalletBalance
+    exposureBps
+    status
+    updatedAt
+  }
+}
+```
+
+```graphql
+{ exposureSnapshots(first: 3) { id } }
+```
+
+```graphql
+{ liquidityPools(first: 3) { id } }
+```
+
+```graphql
+{ swaps(first: 3) { id } }
+```
+
+## Copy-paste queries (Explorer — borrowed)
+
+Aave ETH: https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query
+```graphql
+{
+  protocols(first: 1) {
+    id
+    protocol
+    name
+    slug
+    schemaVersion
+    network
+    type
+    totalValueLockedUSD
+    cumulativeUniqueUsers
+  }
+  markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) {
+    id
+    name
+    totalValueLockedUSD
+    inputToken { symbol name }
+  }
+}
+```
+
+Uniswap Base: https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query
+```graphql
+{
+  liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) {
+    id
+    name
+    totalValueLockedUSD
+    cumulativeVolumeUSD
+  }
+}
+```
+
+Agent0 Base: https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query
+```graphql
+{
+  agentRegistrationFiles(where: {active: true}, first: 2) {
+    agentId
+    name
+    mcpEndpoint
+  }
+  agents(first: 2) {
+    id
+    chainId
+    agentId
+    owner
+  }
+}
+```
