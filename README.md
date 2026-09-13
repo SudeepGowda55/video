@@ -52,14 +52,10 @@ section with the Exposure Gauge, reading 10%]**
 **[Scroll to "Same strategy. Same risk policy. Different execution venue." — the
 "✓ EXACT MATCH — BIT-EXACT" badge is already showing, no click needed]**
 
-### 1:45–2:20 (35s) — The Graph: live verdict, exposure history, pool activity, MCP
+### 1:45–2:20 (35s) — The Graph: owned vs borrowed, live verdict, history, MCP
 
 > **SAY:**
-> "All of this is backed by The Graph. This banner is a reasoned safety verdict computed straight
-> from our subgraph. Below it, real exposure history, and real indexed swaps in a
-> Messari-standardized schema — the same query pattern that works on any standard DEX subgraph
-> works here. And the same data is available to an AI agent over MCP — it can just ask 'is this
-> maker safe?' and get a real answer, no GraphQL required."
+> "All of this is backed by The Graph. Quick split: we made one small subgraph ourselves — that's ethonline — it tracks this maker's exposure and drives this safety banner live. Then we borrow data from big public subgraphs like Aave and Uniswap that other teams maintain — same Messari shape, so the same query works here and there. Below is real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this maker safe?' — no GraphQL needed, no fake numbers."
 
 **[Scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity, from The Graph
 (Messari shape)" → cut to a terminal running a saved MCP tool-call input, showing the response]**
@@ -150,3 +146,7 @@ beat before cutting away]**
   mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
   silently.
 - The multiplier-effect diagram for the opening: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
+- Graph proof links for description (do not open live, to save time):
+  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — `v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities`
+  - Aave ETH (borrowed): https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query — paste `protocols{ schemaVersion totalValueLockedUSD }` → `3.1.0, $24.5B`
+  - Uniswap Base (borrowed): https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query — paste `liquidityPools{ id totalValueLockedUSD }` → same shape as ethonline slice
