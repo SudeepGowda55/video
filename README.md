@@ -1,4 +1,4 @@
-# Aqueduct — 5 Minute Demo Video Script
+# Aqueduct — ~5:25 Demo Video Script
 
 ## Before you hit record — open these tabs, in this order, and pre-paste every query
 
@@ -52,11 +52,11 @@ completely safe"]**
 
 ---
 
-## 1:10–5:10 — Live execution, following the page top to bottom (4:00, ~600 words)
+## 1:10–5:25 — Live execution, following the page top to bottom (4:15, ~620 words)
 
 **[Switch to Tab 1 — `aqueduct-protocol.vercel.app`, scrolled to the very top]**
 
-### 1:10–1:25 (15s) — Orient + name the mechanism
+### 1:10–1:25 (15s) — "Why this maker is exposure-gated" panel → "Maker exposure" section with the Exposure Gauge, reading 10%
 
 > **SAY:**
 > "This is Aqueduct, live on Base Sepolia — nothing here is mocked. We added a new SwapVM
@@ -64,20 +64,17 @@ completely safe"]**
 > oracle and derates or halts their fill. Right now this maker's exposure gauge reads 10% —
 > safe."
 
-**[Already on screen after scroll: "Why this maker is exposure-gated" panel → "Maker exposure"
-section with the Exposure Gauge, reading 10%]**
-
-### 1:25–1:45 (20s) — Cross-venue proof (predicted, not yet executed)
+### 1:25–1:45 (20s) — "Same strategy. Same risk policy. Different execution venue." — the "✓ EXACT MATCH — BIT-EXACT" badge already showing, no click needed
 
 > **SAY:**
 > "Scrolling down — here's the core claim, computed live: the same strategy backs two execution
 > venues, and the predicted output is bit-for-bit identical whether it fills through SwapVM or
 > through Uniswap v4. We'll prove that for real with actual swaps in a minute."
 
-**[Scroll to "Same strategy. Same risk policy. Different execution venue." — the
-"✓ EXACT MATCH — BIT-EXACT" badge is already showing, no click needed]**
+### 1:45–2:20 (35s) — Tab 3 (Studio) → Tab 4 (Aave) → Tab 5 (Uniswap) → Tab 6 (Agent0) → Tab 1 (Graph panels) → Tab 7 (MCP)
 
-### 1:45–2:20 (35s) — The Graph: owned vs. borrowed, live verdict, history, MCP
+This one is a sequence across six screens, not a single on-screen state, so it doesn't fold into
+one header line the way the others do — the header above just names the path.
 
 **This beat is interleaved, not "say it all then click" — each line of narration is timed to
 land right after the matching tab is already up on screen. Say the line, THEN cue the next tab
@@ -128,25 +125,21 @@ node mcp/server.js < saved-mcp-input.jsonl
 > **SAY:**
 > "and over MCP an agent can just ask 'is this maker safe?' — no GraphQL, no fake numbers."
 
-### 2:20–2:50 (30s) — Actually swap on both venues
-
-**[Both swap panels now default to the same amount (1) — no need to touch the input fields
-before this beat, they already match.]**
+### 2:20–2:50 (30s) — "Swap directly via SwapVM" / "Swap via Uniswap v4" row (both default to amount 1, already matching)
 
 > **SAY:**
 > "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
-> > confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
+> confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
 > sourced by our custom hook — [click, wait for the toast] — same output again. Genuinely
 > executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill
 > comes from that same Aqua strategy."
 
-**[Scroll to the "Swap directly via SwapVM" / "Swap via Uniswap v4" row → click Swap on the
-SwapVM panel → hold one beat on the confirmation toast → click Swap on the Uniswap v4 panel →
-hold one beat on its toast → hold both toasts on screen together so the matching output numbers
-are readable side by side. If Base Sepolia confirmation is slow, cut on the toast rather than
-waiting live.]**
+**[Click Swap on the SwapVM panel → hold one beat on the confirmation toast → click Swap on the
+Uniswap v4 panel → hold one beat on its toast → hold both toasts on screen together so the
+matching output numbers are readable side by side. If Base Sepolia confirmation is slow, cut on
+the toast rather than waiting live.]**
 
-### 2:50–3:25 (35s) — Strategy P + the dynamic-fee pool
+### 2:50–3:25 (35s) — "Strategy P (price + risk aware)" / "Risk-adjusted dynamic fee (Uniswap v4)" row
 
 > **SAY:**
 > "This maker also runs a more sophisticated program, reading a real live Chainlink ETH/USD feed
@@ -155,61 +148,69 @@ waiting live.]**
 > the predicted fee next to the persisted on-chain fee — I'll hit refresh — [click] — a real
 > transaction, no swap required."
 
-**[Scroll to the "Strategy P (price + risk aware)" / "Risk-adjusted dynamic fee (Uniswap v4)"
-row — point at the live Chainlink price, then click "Push current fee on-chain (refreshFee)" on
-the dynamic-fee panel]**
+**[Point at the live Chainlink price, then click "Push current fee on-chain (refreshFee)" on the
+dynamic-fee panel]**
 
-### 3:25–3:50 (25s) — Maker emergency pause
+### 3:25–3:40 (15s) — "Ungated vs. exposure-gated" panel
+
+This is a read-only panel — no wallet, no transaction, nothing for Vishruth to do. You just point
+at the two numbers that are already sitting on screen after the previous scroll.
+
+> **SAY:**
+> "One more comparison, and this one needs no wallet at all — both numbers come straight from
+> public reads. It prices the same 100-token swap two ways: what the raw pool curve alone would
+> pay out with no exposure gate, against what it actually pays out right now. At this maker's
+> current 10% exposure they're identical, because 10% is well under the derate threshold — the
+> gate only starts biting once exposure climbs, which is exactly what we're about to push it to."
+
+**[Point at the two output numbers side by side — "Ungated" and "Exposure-gated" — then the
+footer line underneath showing this maker's exposure percentage and committed amount for this
+strategy. No clicking needed; the toggle/amount field can stay at its default.]**
+
+### 3:40–4:05 (25s) — "Maker risk policy" / "Maker emergency halt" row
 
 > **SAY:**
 > "The maker also has an independent kill switch. [click "Pause (emergency halt)"] Now any fill
 > on either venue reverts with the exact expected error. [attempt swap, show revert] Unpausing
 > restores it immediately. [click "Unpause"]"
 
-**[Scroll to the "Maker risk policy" / "Maker emergency halt" row]**
-
-### 3:50–4:10 (20s) — Keeper pushes real exposure
+### 4:05–4:25 (20s) — "Keeper control (demo)" / "Activity" row
 
 > **SAY:**
 > "Last piece: the keeper is what pushes real exposure readings on-chain. Let's push this maker
 > to 70%. [click]"
 
-**[Scroll to the "Keeper control (demo)" / "Activity" row — click the "Derated (70%)" preset
-button, the "Activity" panel shows the real transaction]**
+**[Click the "Derated (70%)" preset button — the "Activity" panel shows the real transaction]**
 
-### 4:10–4:30 (20s) — The one deliberate callback: scroll back up
+### 4:25–4:45 (20s) — Exposure Gauge (now "Derated") / "Swap directly via SwapVM" panel — the one deliberate callback
 
 > **SAY:**
 > "Scrolling back up for a second — the gauge already reads derated, and the exact same swap now
 > fills for noticeably less, automatically, because it's the same program reacting to the same
-> new reading."
+> new reading. And if we scrolled back down to that comparison panel right now, the ungated and
+> gated numbers would finally split apart."
 
-**[Scroll back up to the Exposure Gauge (now showing "Derated") and/or the "Swap directly via
-SwapVM" panel — attempt one more swap, show the reduced output]**
+**[Attempt one more swap, show the reduced output]**
 
-### 4:30–4:50 (20s) — Test suite proof
+### 4:45–5:05 (20s) — Terminal (Tab 8), `forge test --summary`
 
 > **SAY:**
 > "And it's backed by real tests, not just a working demo. Forty-nine Foundry tests across ten
 > suites — including a stateful-fuzz invariant suite that ran 128,000 randomized calls checking
 > committed-balance accounting never drifts. All green."
 
-**[You switch to Tab 8 (your own terminal) → run:**
-
 ```
 forge test --summary
 ```
 
-**→ let the passing suite table sit on screen for a beat before cutting away]**
+**[Let the passing suite table sit on screen for a beat before cutting away]**
 
-### 4:50–5:10 (20s) — Close
+### 5:05–5:25 (20s) — Tab 9, README / GitHub repo page
 
 > **SAY:**
 > "Every number you've seen today is live on Base Sepolia, independently verifiable on-chain.
 > Full developer feedback for Uniswap is in our repo's `FEEDBACK.md`. One risk guarantee, two
 > execution venues, one live data layer connecting them. That's Aqueduct."
-
-**[You switch to Tab 9 — README or GitHub repo page]**
 
 ---
 
@@ -219,12 +220,15 @@ forge test --summary
   opened and pre-loaded _before_ recording starts. Vishruth drives tabs 3–7 (the four Graph tabs
   plus his MCP terminal) on his own screen when you cue him; you drive everything else (tabs 1,
   2, 8, 9) yourself — that's the only live coordination needed for the whole video.
-- The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:25), and the keeper
-  push (3:50) are the segments most likely to run long if a transaction confirmation is slow on
+- The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:40), and the keeper
+  push (4:05) are the segments most likely to run long if a transaction confirmation is slow on
   Base Sepolia — consider recording those in a separate take and cutting on the confirmation
   toast rather than waiting live.
+- The "Ungated vs. exposure-gated" panel (3:25) is read-only and needs no wallet or transaction —
+  it's the one beat in the whole live-execution block where you can just talk and point, no
+  clicking, so use it as a breather between the fee-refresh click and the pause/unpause click.
 - The whole demo follows the page top to bottom in one pass, with exactly one deliberate
-  scroll-back-up at 4:10 to show the keeper push taking effect — that's intentional, not a
+  scroll-back-up at 4:25 to show the keeper push taking effect — that's intentional, not a
   mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
   silently.
 - The Aave/Uniswap/Agent0 Explorer links (tabs 4–6) are public third-party subgraphs Vishruth
