@@ -55,21 +55,18 @@ section with the Exposure Gauge, reading 10%]**
 ### 1:45–2:20 (35s) — The Graph: owned vs borrowed, live verdict, history, MCP
 
 > **SAY:**
-> "All of this is backed by The Graph. Quick split: we made one small subgraph ourselves — that's ethonline — it tracks this maker's exposure and drives this safety banner live. Then we borrow data from big public subgraphs like Aave and Uniswap that other teams maintain — same Messari shape, so the same query works here and there. Below is real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this maker safe?' — no GraphQL needed, no fake numbers."
+> "All of this is backed by The Graph. Quick split: we made one small subgraph ourselves — that's ethonline — it tracks this maker 0x5067...132be with ten positions and drives this safety banner live. Here's one live: 100k committed against 1.39M wallet, 1000 bps, status SAFE — that's the 10% gauge. Then we borrow data from big public subgraphs like Aave and Uniswap that other teams maintain — same Messari shape, so the same query works here and there. Below is real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this maker safe?' — no GraphQL needed, no fake numbers."
 
-**[Scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity, from The Graph
+**[Show Studio Playground exposurePositions{ committedAmount makerWalletBalance exposureBps status } screenshot, then scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity, from The Graph
 (Messari shape)" → cut to a terminal running a saved MCP tool-call input, showing the response]**
 
 ### 2:20–2:50 (30s) — Actually swap on both venues
 
 > **SAY:**
-> "Now let's actually do it, for real. Swap directly through SwapVM — [click] — and through the
-> Uniswap v4 pool sourced by our custom hook — [click]. Same output, genuinely executed, not just
-> predicted — because the v4 pool has zero liquidity of its own, every fill comes from that same
-> Aqua strategy."
+> "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait toast] — 0.42 Aqua out. Now the same size through the Uniswap v4 pool sourced by our custom hook — [click, wait toast] — 0.42 out again. Same output, genuinely executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill comes from that same Aqua strategy. Pause on the two toasts side by side."
 
 **[Scroll to the "Swap directly via SwapVM" / "Swap via Uniswap v4" row → click Swap on each →
-point back at the matching output amounts]**
+hold 1 beat on each confirmation toast → point back at the matching output amounts. If Base Sepolia is slow, cut on toast, do not wait live.]**
 
 ### 2:50–3:25 (35s) — Strategy P + the dynamic-fee pool
 
@@ -146,7 +143,15 @@ beat before cutting away]**
   mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
   silently.
 - The multiplier-effect diagram for the opening: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
-- Graph proof links for description (do not open live, to save time):
-  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — `v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities`
-  - Aave ETH (borrowed): https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query — paste `protocols{ schemaVersion totalValueLockedUSD }` → `3.1.0, $24.5B`
-  - Uniswap Base (borrowed): https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query — paste `liquidityPools{ id totalValueLockedUSD }` → same shape as ethonline slice
+- Graph proof links for description (only working, verified today):
+  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities
+  - Maker on-chain (working): https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be — real maker txs
+  - Playground working queries (Studio Playground tab):
+    - { makers(first: 5) { id positionIds } } → 1 maker, 10 positionIds
+    - { exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } } → 1000 bps SAFE
+    - { exposureSnapshots(first: 3) { id } } → history
+    - { liquidityPools(first: 3) { id } } → Messari slice
+    - { swaps(first: 3) { id } } → indexed swaps
+  - Aave ETH (borrowed, working): https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query — paste protocols{ schemaVersion totalValueLockedUSD } → 3.1.0, $24.5B
+  - Uniswap Base (borrowed, working): https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query — paste liquidityPools{ id totalValueLockedUSD } → same shape as ethonline slice
+  - Agent0 Base (borrowed, working): https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query
