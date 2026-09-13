@@ -82,37 +82,57 @@ section with the Exposure Gauge, reading 10%]**
 
 ### 1:45–2:20 (35s) — The Graph: owned vs. borrowed, live verdict, history, MCP
 
-> **SAY:**
-> "All of this is backed by The Graph. Quick split: we built one subgraph ourselves — that's
-> `ethonline` — it tracks this maker, `0x5067...132be`, across ten positions and drives this
-> safety banner live. Here's one, live right now: 100k committed against a 1.39 million wallet,
-> 1000 basis points, status SAFE — that's the same 10% you just saw on the gauge. Then we compose
-> with public subgraphs other teams maintain — Aave, Uniswap, Agent0 — using the same
-> Messari-standard shape, so the same query pattern that works on ours works on theirs too. Below
-> that, real exposure history and real indexed swaps, and over MCP an agent can just ask 'is this
-> maker safe?' — no GraphQL, no fake numbers."
+**This beat is interleaved, not "say it all then click" — each line of narration is timed to
+land right after the matching tab is already up on screen. Say the line, THEN cue the next tab
+while it's loading/settling, not the reverse.**
 
-**[Cue Vishruth for tabs 3–7 in order, you stay on Tab 1 in between his cuts:**
-**1. Cue Vishruth → Tab 3 (Studio Playground) → he clicks Run on the pre-pasted
-   `exposurePositions` query → hold on the result (committedAmount, makerWalletBalance,
-   exposureBps, status) for a beat.**
-**2. Cue Vishruth → Tab 4 (Aave Explorer) → he clicks Run → hold on the `markets` result.**
-**3. Cue Vishruth → Tab 5 (Uniswap Base Explorer) → he clicks Run → hold on the `liquidityPools`
-   result.**
-**4. Cue Vishruth → Tab 6 (Agent0 Base Explorer) → he clicks Run → hold on the `agents` result.**
-**5. Back to you, Tab 1 → scroll past "Maker safety" → "Exposure, from The Graph" → "Pool
-   activity, from The Graph (Messari shape)".**
-**6. Cue Vishruth → Tab 7 (his terminal) → he runs:**
+> **SAY (Tab 1, before cueing anyone):**
+> "All of this is backed by The Graph."
+
+**[Cue Vishruth → Tab 3 (Studio Playground) → he clicks Run on the pre-pasted
+`exposurePositions` query]**
+
+> **SAY (while his result is on screen):**
+> "Quick split: we built one subgraph ourselves — that's `ethonline` — it tracks this maker,
+> `0x5067...132be`, across ten positions and drives this safety banner live. Here's one, live
+> right now: 100k committed against a 1.39 million wallet, 1000 basis points, status SAFE —
+> that's the same 10% you just saw on the gauge."
+
+**[Cue Vishruth → Tab 4 (Aave Explorer) → he clicks Run]**
+
+> **SAY:**
+> "Then we compose with public subgraphs other teams maintain — Aave —"
+
+**[Cue Vishruth → Tab 5 (Uniswap Base Explorer) → he clicks Run]**
+
+> **SAY:**
+> "Uniswap —"
+
+**[Cue Vishruth → Tab 6 (Agent0 Base Explorer) → he clicks Run]**
+
+> **SAY:**
+> "and Agent0 — using the same Messari-standard shape, so the same query pattern that works on
+> ours works on theirs too."
+
+**[Back to you, Tab 1 → scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity,
+from The Graph (Messari shape)"]**
+
+> **SAY:**
+> "Below that, real exposure history and real indexed swaps,"
+
+**[Cue Vishruth → Tab 7 (his terminal) → he runs:**
 ```
 node mcp/server.js < saved-mcp-input.jsonl
 ```
-**→ hold on the `maker_safety_verdict` response for a beat.]**
+**→ hold on the `maker_safety_verdict` response]**
+
+> **SAY:**
+> "and over MCP an agent can just ask 'is this maker safe?' — no GraphQL, no fake numbers."
 
 ### 2:20–2:50 (30s) — Actually swap on both venues
 
-**[Before this beat: on Tab 1, set BOTH swap panels' amount fields to the same value — e.g. 0.42
-— since "Swap directly via SwapVM" defaults to 10 and "Swap via Uniswap v4" defaults to 1, and
-leaving them mismatched will produce two genuinely different outputs, undercutting the point.]**
+**[Both swap panels now default to the same amount (1) — no need to touch the input fields
+before this beat, they already match.]**
 
 > **SAY:**
 > "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
