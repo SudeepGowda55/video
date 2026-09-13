@@ -73,13 +73,6 @@ completely safe"]**
 
 ### 1:45–2:20 (35s) — Tab 3 (Studio) → Tab 4 (Aave) → Tab 5 (Uniswap) → Tab 6 (Agent0) → Tab 1 (Graph panels) → Tab 7 (MCP)
 
-This one is a sequence across six screens, not a single on-screen state, so it doesn't fold into
-one header line the way the others do — the header above just names the path.
-
-**This beat is interleaved, not "say it all then click" — each line of narration is timed to
-land right after the matching tab is already up on screen. Say the line, THEN cue the next tab
-while it's loading/settling, not the reverse.**
-
 > **SAY (Tab 1, before cueing anyone):**
 > "All of this is backed by The Graph."
 
@@ -129,7 +122,7 @@ node mcp/server.js < saved-mcp-input.jsonl
 
 > **SAY:**
 > "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
-> confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
+> > confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
 > sourced by our custom hook — [click, wait for the toast] — same output again. Genuinely
 > executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill
 > comes from that same Aqua strategy."
