@@ -147,9 +147,12 @@ beat before cutting away]**
   - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0 DEPLOYED Base Sepolia SYNCED 100% 330 entities
   - Maker on-chain (working): https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be
 
-## Copy-paste queries (Studio Playground — ethonline)
+## Copy-paste queries — USE ONLY WHERE LABELED
+
+> WARNING: Studio queries FAIL on Explorer and Explorer queries FAIL on Studio. Paste each block ONLY at its URL below.
 
 ```graphql
+"USE ONLY at https://thegraph.com/studio/subgraph/ethonline/ > Playground"
 { makers(first: 5) { id positionIds } }
 ```
 
