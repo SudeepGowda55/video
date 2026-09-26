@@ -84,9 +84,21 @@ curl -s -X POST "localhost:8788/api/swap?venue=aqua&side=buy&usd=10" | jq -r '.m
 | **2:10–2:30** | Terminal → UI | Paste **C3**. In **On-chain activity**, point at the rows tagged *terminal / API*: "Aqua fill withdrew … WETH from its Morpho vault" and "Aqua proceeds … USDC deposited back into Morpho" | **While pressing Enter:** "Now 1inch Aqua."<br>**After the rows appear:** "The fill withdrew exactly what it needed from the Morpho vault and put the proceeds straight back, in one transaction." |
 | **2:30–2:50** | UI → watch pane | Click **Buy on 1inch official router**, then point at the new line in the watch pane | **While clicking:** "And the other direction: I click in the UI…"<br>**After the watch-pane line:** "…and the terminal feed shows it. That's Aqua's shared liquidity, the same Morpho balance filling on 1inch's unmodified router." |
 | **2:50–3:10** | UI → watch pane | Click **Rebalance now**, then point at the watch pane lines: *retired → shipped → λ carried* | **While clicking:** "A partially active pool lags the market, so its mix drifts."<br>**After the watch-pane lines (10–20 s; pause or cut the wait):** "The keeper retires the strategy, rebalances through Uniswap and re-ships it balanced at the live price, without paying arbitrageurs to do it." |
-| **3:10–3:35** | UI, **Replay** panel, then the replay clip | Point at the bars, then cut 5 s to the recorded forge replay output | "The evidence: the real 24 hours of 21 September, replayed minute by minute against a **real plain Uniswap v4 pool**. Half active cut LP losses **17.6%**, lambda 39% cut them **19.3%**, and the Aqua position lost exactly the same as the hook. Anyone can rerun it with one command." |
+| **3:10–3:35** | UI, **Replay** section (nav "Replay") | 1. Section title. 2. The **plain v4** and **hook λ100%** bars (same height). 3. The two **green** bars (hook λ50%, λ39%). 4. The **cyan Aqua λ50%** bar next to hook λ50%. 5. The command box on the right. (Optional: cut 5 s to the recorded forge replay output.) | 1. "This is the proof: a real day of ETH prices, replayed minute by minute on a Base fork, with a bot arbitraging each pool every minute."<br>2. "A normal Uniswap v4 pool loses about a dollar to the bots. Iceberg at 100% loses the same, so the test is fair."<br>3. "Expose only half the pool, and the loss drops **17.6%**. At 39%, it drops **19.3%**."<br>4. "And the 1inch Aqua version loses exactly the same as the Uniswap hook: one kernel, two venues."<br>5. "Anyone can rerun this with one command." |
 | **3:35–3:50** | `test_all` clip, then the Sepolia tab | Show "52 tests passed … ALL CHECKS PASSED", then the Etherscan transaction | "52 Solidity tests, including 1inch's own invariant suite, a 25-point end-to-end check, deployed and trading on Sepolia, and the Base mainnet run rehearsed with a real wallet." |
 | **3:50–4:00** | UI, **Limitations** section | Scroll to it and hold | "Honest limits: the gain depends on the fee, and fewer active reserves means worse prices for ordinary traders, which is why lambda has a floor. Iceberg: only the tip is exposed. Thanks." |
+
+### How to read the Replay chart
+
+A real day (24 hours ending 21 Sep 2026, ETH $2,635 → $2,800) was replayed on a Base fork. Five pools started with the same money and the same 5 bps fee, and every minute a bot traded each pool to the real price. Each bar is how much that pool's LP lost to the bots. **Lower is better.**
+
+| Bar | Loss | Meaning |
+|---|---|---|
+| plain v4 (grey) | $1.077 | normal Uniswap v4 pool, the baseline |
+| hook λ100% (dark grey) | $1.076 | Iceberg fully active matches plain v4, so the test is fair |
+| hook λ50% (green) | $0.888 | 17.6% less loss |
+| hook λ39% (green) | $0.869 | 19.3% less loss |
+| Aqua λ50% (cyan) | $0.888 | same as hook λ50%: same math on both venues |
 
 ## Recording tips
 
