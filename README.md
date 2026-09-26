@@ -45,7 +45,7 @@ cd ~/projects/ethglobal-online/iceberg
 ./scripts/test_all.sh              # record only the last ~15 lines ending in "ALL CHECKS PASSED."
 REPLAY_MINUTES=1440 forge test --match-contract Replay21Sep -vv   # record the 5 result lines
 ```
-`test_all.sh` starts its own stack with the arbitrageur on, then makes test swaps and a rebalance. That's why the fresh stack comes next. The replay runs on its own separate fork.
+`test_all.sh` runs on a local fork (its own stack, test swaps and a rebalance), not on mainnet. The replay runs on its own separate fork too.
 
 **2. Mainnet UI, right before recording.** Your contracts are live on Base, so every trade is a real transaction you can open on Basescan:
 ```bash
@@ -55,7 +55,7 @@ MAINNET_UI_TRADES=1 npx next dev -p 8790      # open http://localhost:8790/?net=
 ```
 `MAINNET_UI_TRADES=1` lets the UI's trade and Rebalance buttons sign with your key from `.env`. Only run this on your laptop, never on Vercel.
 
-**Budget:** the wallet holds about 0.000128 ETH and 1.43 USDC. A swap costs about $0.005 of gas and a rebalance about $0.05. Keep the recording to about 10 trades and 1 rebalance, so there's ETH left for `./scripts/withdraw_mainnet.sh` (about $0.03). Trade **$0.01** at a time: the positions are about $1 each, so bigger trades move the price a lot. Buy before you sell, because the wallet has no WETH until a buy.
+**Budget:** the wallet holds about 0.000149 ETH (~$0.40) and 2.03 USDC; each venue holds about $0.54. A swap costs about $0.005 of gas and a rebalance about $0.05. Keep the recording to about 10 trades and 1 rebalance, so there's ETH left for `./scripts/withdraw_mainnet.sh` (about $0.03). Trade **$0.01** at a time: the positions are about $0.54 each, so bigger trades move the price a lot. Buy before you sell, because the wallet has no WETH until a buy.
 
 **Don't start the keeper on mainnet:** it would spend ETH every 20 seconds. The Keeper panel will say "waiting for keeper", which is fine.
 
@@ -128,12 +128,21 @@ A real day (24 hours ending 21 Sep 2026, ETH $2,635 → $2,800) was replayed on 
 | hook λ39% (green) | $0.869 | 19.3% less loss |
 | Aqua λ50% (cyan) | $0.888 | same as hook λ50%: same math on both venues |
 
+## After recording: take the tokens back
+
+```bash
+cd ~/projects/ethglobal-online/iceberg
+./scripts/withdraw_mainnet.sh          # retires both strategies, removes the v4 liquidity, redeems Morpho, unwraps WETH
+```
+Safe to run twice. To put small positions back later: `CONFIRM=yes ./scripts/refund_mainnet.sh`.
+
 ## Recording tips
 
 - **Budget:** about 10 trades of $0.01 and 1 rebalance. Keep ETH for `./scripts/withdraw_mainnet.sh`.
+- **Type the swap commands in full** (`NETWORK=mainnet npm run swap -- v4 buy 0.01`). Don't put the arguments in a shell variable: zsh passes them as one word, and the script falls back to a $5 trade, which these pools reject.
 - **Timing:** in the five action scenes (1:20–2:35), say the first half while you press Enter or click, and the second half once the result is on screen. Results take about 2–3 s, and the rebalance 10–20 s. Scenes without an action have nothing to wait for, so just talk over them.
 - **Easiest option:** record the screen silently first, then add the voice-over while watching the recording, so every "after" line lands on its result.
-- **Numbers on screen are small:** the mainnet positions are about $1 each, so reserves change only slightly. The point on mainnet is that every step is a real transaction on Basescan. Read λ off the screen, and keep the replay percentages as scripted.
+- **Numbers on screen are small:** the mainnet positions are about $0.54 each, so reserves change only slightly. The point on mainnet is that every step is a real transaction on Basescan. Read λ off the screen, and keep the replay percentages as scripted.
 - **If a mainnet command fails:** check the wallet still has ETH (`cast balance 0x3AaAe578f1F6bBE9705363DE4354d64d6a09C8B7 --ether --rpc-url https://mainnet.base.org`). As a fallback, record the same scenes on the local fork: `SIM_ARB=0 ./scripts/start_local.sh`, UI at `localhost:8788`, and the fork commands `curl -s -X POST "localhost:8788/api/swap?venue=v4&side=buy&usd=10" | jq -r '.message, .tx'` (same for `venue=aqua`).
 - **Editing:** record the UI/terminal blocks as separate takes and cut them together. Splice in the code flash and proof clips afterwards.
 - **Fallback:** `cd frontend && PAUSE=1 npx tsx scripts/demo.ts` runs all 10 demo steps with a pause between each.
