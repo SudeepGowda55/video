@@ -1,4 +1,4 @@
-# Iceberg: demo video script (4:00)
+# Iceberg: demo video script (4:00, live on Base mainnet)
 
 ## Words used in this script
 
@@ -15,7 +15,7 @@
 | **1inch official router** | Not a third Iceberg venue. It's a plain strategy on 1inch's own router, backed by the same Morpho balance as the Aqua position (Aqua shared liquidity). | |
 | **Keeper** | A background script. Every 20 s it copies the live ETH price, picks λ, parks or unparks idle funds in Morpho, and rebalances when the mix drifts. | |
 
-## What `./scripts/start_local.sh` does
+## What `./scripts/start_local.sh` does (local fork: used by the test clip and as a fallback)
 
 Everything runs on a private copy of Base mainnet on your laptop. Nothing touches the real chain, and your real wallet isn't used.
 
@@ -35,7 +35,7 @@ Everything runs on a private copy of Base mainnet on your laptop. Nothing touche
    - All addresses go to `deployments/local.json`.
 6. **Keeper and UI.** Starts the keeper (log in `.run/keeper.log`) and the web app at `http://localhost:8788/`, with the API at `/api/status`.
 
-**READY** means you can open the UI. Both venues start with the same 2 WETH and matching USDC at the same price. That's why the two quotes in C1 match exactly.
+**READY** means you can open the fork UI at `localhost:8788`.
 
 ## Before you hit record (15 min ahead)
 
@@ -47,30 +47,41 @@ REPLAY_MINUTES=1440 forge test --match-contract Replay21Sep -vv   # record the 5
 ```
 `test_all.sh` starts its own stack with the arbitrageur on, then makes test swaps and a rebalance. That's why the fresh stack comes next. The replay runs on its own separate fork.
 
-**2. Fresh stack, last, right before recording**, so both venues start identical:
+**2. Mainnet UI, right before recording.** Your contracts are live on Base, so every trade is a real transaction you can open on Basescan:
 ```bash
-./scripts/stop_local.sh; SIM_ARB=0 ./scripts/start_local.sh      # wait for "READY" (~3 min)
+cd ~/projects/ethglobal-online/iceberg/frontend
+set -a; source ../.env; set +a
+MAINNET_UI_TRADES=1 npx next dev -p 8790      # open http://localhost:8790/?net=mainnet
 ```
-`SIM_ARB=0` turns off the keeper's simulated arbitrageur. It trades every venue each tick, which pushes your trades down the activity feed and moves the two venues' prices apart before C1.
-Any swap or rebalance moves each venue's reserves differently, and after that the two quotes won't match. So record the demo right after "READY", and run C1 before any trade or rebalance.
+`MAINNET_UI_TRADES=1` lets the UI's trade and Rebalance buttons sign with your key from `.env`. Only run this on your laptop, never on Vercel.
+
+**Budget:** the wallet holds about 0.000128 ETH and 1.43 USDC. A swap costs about $0.005 of gas and a rebalance about $0.05. Keep the recording to about 10 trades and 1 rebalance, so there's ETH left for `./scripts/withdraw_mainnet.sh` (about $0.03). Trade **$0.01** at a time: the positions are about $1 each, so bigger trades move the price a lot. Buy before you sell, because the wallet has no WETH until a buy.
+
+**Don't start the keeper on mainnet:** it would spend ETH every 20 seconds. The Keeper panel will say "waiting for keeper", which is fine.
 
 **3. Screen layout** (1920×1080):
-- **Right half:** browser at `http://localhost:8788/`, zoomed to 90%, trade size box set to **10**.
-- **Left top terminal (live feed):** `cd ~/projects/ethglobal-online/iceberg/frontend && npm run watch`
-  - This is the **"watch pane"** in the script. It's a terminal, not part of the UI. The UI's own feed is the **On-chain activity** section (nav link "Activity"), and both show the same events.
-- **Left bottom terminal (commands):** `cd ~/projects/ethglobal-online/iceberg && clear`
+- **Right half:** browser at `http://localhost:8790/?net=mainnet`. The header must say **Base mainnet**, and the trade size box shows **0.01**.
+- **Left top terminal (watch pane):**
+  ```bash
+  cd ~/projects/ethglobal-online/iceberg/frontend && set -a && source ../.env && set +a && NETWORK=mainnet npm run watch
+  ```
+  The UI's own feed is the **On-chain activity** section. Both show the same events, and every row in the UI has a ↗ Basescan link.
+- **Left bottom terminal (commands):**
+  ```bash
+  cd ~/projects/ethglobal-online/iceberg/frontend && set -a && source ../.env && set +a && clear
+  ```
 - **Extra tabs, ready:**
   - VS Code with four tabs, scrolled to the lines in **Code tour** below: `contracts/periphery/IcebergConfig.sol`, `contracts/iceberg/PAActiveReserves.sol`, `contracts/iceberg/IcebergRouter.sol`, `contracts/v4/IcebergHook.sol`;
-  - the Sepolia Aqua fill: https://sepolia.etherscan.io/tx/0x321ee1482759a2393852a0b3b156bc6e65e3f897203297fe440baf296c4223b1
+  - a browser tab for Basescan (links open there).
 
-**4. Paste-ready commands:**
+**4. Paste-ready commands** (from the commands pane):
 ```bash
-# C1: same price on both venues
-for v in v4 aqua; do curl -s "localhost:8788/api/quote?venue=$v&side=buy&usd=10" | jq -r '"\(.venue): \(.amountOut) WETH"'; done
-# C2: real swap through the Uniswap v4 pool
-curl -s -X POST "localhost:8788/api/swap?venue=v4&side=buy&usd=10" | jq -r '.message, .tx'
-# C3: real fill on the 1inch Aqua position
-curl -s -X POST "localhost:8788/api/swap?venue=aqua&side=buy&usd=10" | jq -r '.message, .tx'
+# C1: what the chain says right now: λ, total and reachable reserves on both venues
+curl -s "localhost:8790/api/status?net=mainnet" | jq '{network, block, uniswap: {lambda: .uniswapV4.lambdaPct, total: .uniswapV4.reserves, reachable: .uniswapV4.active}, aqua: {lambda: .oneInchAqua.lambdaPct, total: .oneInchAqua.balances, reachable: .oneInchAqua.active}}'
+# C2: real 1-cent swap through the Uniswap v4 hook on Base mainnet (prints a basescan.org link)
+NETWORK=mainnet npm run swap -- v4 buy 0.01
+# C3: real 1-cent fill on the 1inch Aqua position (prints a basescan.org link)
+NETWORK=mainnet npm run swap -- aqua buy 0.01
 ```
 
 ## The script
@@ -82,16 +93,16 @@ The opening states the problem in proper terms. Everything after it is in plain 
 | Time | Screen | Do | Say (voice-over) |
 |---|---|---|---|
 | **0:00–0:29** | UI, top of page | Move the mouse over the headline, then the **19.3%** tile | "Automated market makers, or AMMs, like Uniswap hold billions for liquidity providers, about four billion on Uniswap alone. But a pool's price only moves when someone trades. When ETH moves on Binance, the pool is stale for a moment, and arbitrage bots trade against the old price. Researchers call this **loss-versus-rebalancing**, or LVR: a hidden cost on every pool, every block. I built **Iceberg** to shrink it." |
-| **0:29–0:50** | UI, **Venues** section | Point at the blue, grey and green bars on the Uniswap card, then the 1inch card | "The idea comes from a 2026 research paper: don't put all your money on the counter. **Blue** can trade right now. **Grey** is locked for this block. **Green** earns interest in Morpho, a savings vault. Only the tip is exposed, like an iceberg, on both **Uniswap** and **1inch Aqua**." |
+| **0:29–0:50** | UI, **Venues** section | Point at the blue, grey and green bars on the Uniswap card, then the 1inch card | "The idea comes from a 2026 research paper: don't put all your money on the counter. **Blue** can trade right now. **Grey** is locked for this block. **Green** earns interest in Morpho, a savings vault. Only the tip is exposed, like an iceberg, live on Base mainnet on both **Uniswap** and **1inch Aqua**." |
 | **0:50–1:06** | VS Code | Four quick shots, see **Code tour** below the table: `program()` → `PAActiveReserves.exec` → `IcebergRouter._runOpcode` → `IcebergHook._getUnspecifiedAmount` | "On 1inch, I wrote two custom **SwapVM instructions**: one freezes the passive part each block, one checks the price against Chainlink. On Uniswap, the same freeze runs in a **v4 hook** that parks idle funds in Morpho." |
-| **1:06–1:20** | UI, **Keeper** panel | Point at the "Why λ = …" sentence | "How much stays on the counter? A keeper decides every 20 seconds from the last six hours of real prices. Wild market: lock more. Calm market: open up, to 80%. Never below 10%." |
-| **1:20–1:32** | Terminal (bottom) | Paste **C1** | **While pressing Enter:** "Let me show it working. I ask both places for the price of a ten-dollar trade…"<br>**After the output:** "…same answer from both." |
-| **1:32–1:48** | Terminal → UI → watch pane | Paste **C2**. Point at the pop-up, then **reserves** and **last split block** on the Uniswap card, then the watch pane | **While pressing Enter:** "Now a real ten-dollar trade on Uniswap."<br>**After the pop-up:** "The website shows it instantly: how much was open and how much was locked this block. My terminal shows the same trade." |
-| **1:48–2:04** | Terminal → UI | Paste **C3**. In **On-chain activity**, point at the *terminal / API* rows "withdrew … from its Morpho vault" and "deposited back into Morpho" | **While pressing Enter:** "Same on **1inch Aqua**."<br>**After the rows appear:** "Real token transfers, on-chain: the money left the Morpho vault only at the moment of the trade, and what I paid went straight back in, earning interest." |
-| **2:04–2:20** | UI → watch pane | Click **Buy on 1inch official router**, then point at the new line in the watch pane | **While clicking:** "Now the other way: I click on the website…"<br>**After the watch-pane line:** "…and my terminal shows it. That's **Aqua's shared liquidity**: one pile of money backing two strategies, including one on 1inch's own router." |
-| **2:20–2:35** | UI → watch pane | Click **Rebalance now**, then point at the watch pane lines | **While clicking:** "The pool's mix of ETH and dollars slowly drifts."<br>**After the lines appear (cut the wait in editing):** "One click: the keeper retires the strategy, fixes the mix, and re-ships it at today's price." |
+| **1:06–1:20** | UI, venue cards → Basescan | Point at **λ** on both venue cards, then in **On-chain activity** click the ↗ on "keeper set λ = …%" to open it on Basescan | "How much stays on the counter? A keeper decides from the last six hours of real prices and publishes it on-chain, here on Basescan. Wild market: lock more. Calm market: open up, to 80%. Never below 40%, so normal traders always find deep liquidity." |
+| **1:20–1:32** | Terminal (bottom) | Paste **C1** | **While pressing Enter:** "This is live on Base mainnet. I ask what's on-chain right now…"<br>**After the output:** "…on both venues, only part of the pool can be reached this block." |
+| **1:32–1:48** | Terminal → Basescan → UI | Paste **C2**, then click the **basescan.org** link it prints. Back in the UI, point at the new rows in **On-chain activity** | **While pressing Enter:** "Now a real one-cent trade on Uniswap, on mainnet."<br>**After the link opens:** "There it is on Basescan. The website shows it too, with how much was open and how much was locked this block." |
+| **1:48–2:04** | Terminal → Basescan | Paste **C3**, click its **basescan.org** link, and scroll to the token transfers | **While pressing Enter:** "Same on **1inch Aqua**."<br>**After the link opens:** "Real token transfers, on-chain: the WETH came out of the Morpho vault only for this trade, and my USDC went straight back in, earning interest." |
+| **2:04–2:20** | UI → watch pane → Basescan | In the UI, click **Buy on 1inch official router** (size 0.01), point at the new line in the watch pane, then click its ↗ in the UI feed | **While clicking:** "Now the other way: I click on the website…"<br>**After the watch-pane line:** "…and my terminal shows it, and so does Basescan. That's **Aqua's shared liquidity**: one pile of money backing two strategies, including one on 1inch's own router." |
+| **2:20–2:35** | UI → watch pane → Basescan | Click **Rebalance now**, point at the watch pane lines, then click the ↗ on "shipped Aqua strategy" in the UI feed | **While clicking:** "The pool's mix of ETH and dollars slowly drifts."<br>**After the lines appear (cut the wait in editing):** "One click: the keeper retires the strategy and re-ships it at today's price, on-chain." |
 | **2:35–3:03** | UI, **Replay** section | 1. Section title. 2. The **plain v4** and **hook λ100%** bars. 3. The two **green** bars. 4. The **cyan Aqua** bar. 5. The command box on the right. | 1. "Does it work? I replayed one real day of ETH prices, minute by minute, with a bot attacking every pool."<br>2. "A normal Uniswap pool lost about a dollar. Iceberg fully open lost the same, so the test is fair."<br>3. "Half open: **17.6%** less loss. At 39%: **19.3%** less."<br>4. "And the 1inch version matched the Uniswap one exactly."<br>5. "Anyone can rerun it with one command." |
-| **3:03–3:13** | `test_all` clip, then the Sepolia tab | Show "ALL CHECKS PASSED", then the Etherscan transaction | "52 contract tests and a full end-to-end check pass. It's live on Sepolia, and I rehearsed the real Base run with my own wallet." |
+| **3:03–3:13** | `test_all` clip, then the README | `test_all` clip, then the README's **Live on Base mainnet** row | "52 contract tests and a full end-to-end check pass. It's deployed on Base mainnet and Sepolia, and every transaction is on the explorer." |
 | **3:13–3:22** | UI, top of page | Scroll back to the top and hold on the **19.3%** tile | "Less lost to bots, more earned in Morpho, on both Uniswap and 1inch. Iceberg: only the tip is exposed. Thanks." |
 
 ### Code tour
@@ -119,10 +130,10 @@ A real day (24 hours ending 21 Sep 2026, ETH $2,635 → $2,800) was replayed on 
 
 ## Recording tips
 
-- **Order matters:** run **C1 before Rebalance now**. A rebalance changes the Aqua reserves, and the two prices would then differ slightly.
+- **Budget:** about 10 trades of $0.01 and 1 rebalance. Keep ETH for `./scripts/withdraw_mainnet.sh`.
 - **Timing:** in the five action scenes (1:20–2:35), say the first half while you press Enter or click, and the second half once the result is on screen. Results take about 2–3 s, and the rebalance 10–20 s. Scenes without an action have nothing to wait for, so just talk over them.
 - **Easiest option:** record the screen silently first, then add the voice-over while watching the recording, so every "after" line lands on its result.
-- **Numbers on screen will differ** from the script (λ, prices, hashes follow the live market). Read them off the screen, and keep the replay percentages as scripted.
-- **If a command fails:** stop recording, run `./scripts/stop_local.sh && SIM_ARB=0 ./scripts/start_local.sh`, and retake that scene.
+- **Numbers on screen are small:** the mainnet positions are about $1 each, so reserves change only slightly. The point on mainnet is that every step is a real transaction on Basescan. Read λ off the screen, and keep the replay percentages as scripted.
+- **If a mainnet command fails:** check the wallet still has ETH (`cast balance 0x3AaAe578f1F6bBE9705363DE4354d64d6a09C8B7 --ether --rpc-url https://mainnet.base.org`). As a fallback, record the same scenes on the local fork: `SIM_ARB=0 ./scripts/start_local.sh`, UI at `localhost:8788`, and the fork commands `curl -s -X POST "localhost:8788/api/swap?venue=v4&side=buy&usd=10" | jq -r '.message, .tx'` (same for `venue=aqua`).
 - **Editing:** record the UI/terminal blocks as separate takes and cut them together. Splice in the code flash and proof clips afterwards.
 - **Fallback:** `cd frontend && PAUSE=1 npx tsx scripts/demo.ts` runs all 10 demo steps with a pause between each.
