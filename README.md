@@ -38,20 +38,20 @@ Everything runs on a private copy of Base mainnet on your laptop. Nothing touche
 
 ## Before you hit record (15 min ahead)
 
-**1. Fresh stack**, so both venues start identical:
+**1. Record two short proof clips first.** They take minutes to run, so don't do them live:
 ```bash
 cd ~/projects/ethglobal-online/iceberg
-./scripts/stop_local.sh; SIM_ARB=0 ./scripts/start_local.sh      # wait for "READY" (~3 min)
-```
-`SIM_ARB=0` turns off the keeper's simulated arbitrageur. It trades every venue each tick, which pushes your trades down the activity feed and moves the two venues' prices apart before C1.
-Any swap or rebalance moves each venue's reserves differently, and after that the two quotes won't match. So restart right before recording, and run C1 before any trade or rebalance.
-
-**2. Record two short proof clips first.** They take minutes to run, so don't do them live:
-```bash
 ./scripts/test_all.sh              # record only the last ~15 lines ending in "ALL CHECKS PASSED."
 REPLAY_MINUTES=1440 forge test --match-contract Replay21Sep -vv   # record the 5 result lines
 ```
-`test_all.sh` restarts the stack, so run step 1 again after it.
+`test_all.sh` starts its own stack with the arbitrageur on, then makes test swaps and a rebalance. That's why the fresh stack comes next. The replay runs on its own separate fork.
+
+**2. Fresh stack, last, right before recording**, so both venues start identical:
+```bash
+./scripts/stop_local.sh; SIM_ARB=0 ./scripts/start_local.sh      # wait for "READY" (~3 min)
+```
+`SIM_ARB=0` turns off the keeper's simulated arbitrageur. It trades every venue each tick, which pushes your trades down the activity feed and moves the two venues' prices apart before C1.
+Any swap or rebalance moves each venue's reserves differently, and after that the two quotes won't match. So record the demo right after "READY", and run C1 before any trade or rebalance.
 
 **3. Screen layout** (1920×1080):
 - **Right half:** browser at `http://localhost:8788/`, zoomed to 90%, trade size box set to **10**.
