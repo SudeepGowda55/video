@@ -1,234 +1,96 @@
-# Aqueduct — ~5:25 Demo Video Script
+# Iceberg: demo video script (4:00)
 
-## Before you hit record — open these tabs, in this order, and pre-paste every query
+## Words used in this script
 
-**Division of labor: Vishruth owns tabs 3–7 (all four Graph tabs, plus the MCP terminal) — he
-opens them, pastes the queries, and clicks Run/executes on his own screen when you cue him. You
-own everything else (tabs 1, 2, 8, 9) and drive those yourself.** Nobody types a URL or pastes a
-query live on camera — everything below is pre-loaded before recording starts.
+| Word | Meaning | Say it |
+|---|---|---|
+| **AMM** | Automated Market Maker. A smart contract that holds a pool of two tokens (here ETH and USDC) and trades with anyone directly, pricing by a formula. Uniswap is one, and a 1inch Aqua strategy works the same way. | "A-M-M" |
+| **Partially Active AMM** | Only part of the pool can trade in each block. The rest is frozen for that block and earns yield in Morpho. From the paper arXiv 2602.09887 (Ko, 2026). | |
+| **λ** | Greek letter lambda: the fraction of the pool that can trade this block. "λ is 80%" means 80% can trade. | "LAM-duh" (silent b) |
+| **Venue** | A place where traders swap against Iceberg's liquidity. There are two, running the same math. | |
+| **Venue 1: 1inch Aqua** | The maker ships a strategy to 1inch Aqua. Takers swap through `IcebergRouter`, where a new SwapVM instruction (`PAActiveReserves`) freezes the passive part each block. | |
+| **Venue 2: Uniswap v4** | A v4 pool whose hook (`IcebergHook`) does the same per-block freeze. | |
+| **1inch official router** | Not a third Iceberg venue. It's a plain strategy on 1inch's own router, backed by the same Morpho balance as the Aqua position (Aqua shared liquidity). | |
+| **Keeper** | A background script. Every 20 s it copies the live ETH price, picks λ, parks or unparks idle funds in Morpho, and rebalances when the mix drifts. | |
 
-| Tab | Owner        | URL                                                                                                                | Pre-paste this query into it, don't run it yet                                                                                                                                                                                                            |
-| --- | ------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **You**      | `https://aqueduct-protocol.vercel.app/` (wallet connected)                                                         | — (this is the main dashboard, used most of the video)                                                                                                                                                                                                    |
-| 2   | **You**      | `submission-screenshots/multiplier-effect-diagram.html` (the published artifact link)                              | —                                                                                                                                                                                                                                                         |
-| 3   | **Vishruth** | `https://thegraph.com/studio/subgraph/ethonline/` → Playground                                                     | `{ exposurePositions(first: 3) { id committedAmount makerWalletBalance exposureBps status updatedAt } }`                                                                                                                                                  |
-| 4   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk?view=Query` (Aave, Ethereum) | `{ protocols(first: 1) { id protocol name slug schemaVersion network type totalValueLockedUSD cumulativeUniqueUsers } markets(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD inputToken { symbol name } } }` |
-| 5   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS?view=Query` (Uniswap, Base)  | `{ liquidityPools(first: 5, orderBy: totalValueLockedUSD, orderDirection: desc) { id name totalValueLockedUSD cumulativeVolumeUSD } }`                                                                                                                    |
-| 6   | **Vishruth** | `https://thegraph.com/explorer/subgraphs/43s9hQRurMGjuYnC1r2ZwS6xSQktbFyXMPMqGKUFJojb?view=Query` (Agent0, Base)   | `{ agentRegistrationFiles(where: {active: true}, first: 2) { agentId name mcpEndpoint } agents(first: 2) { id chainId agentId owner } }`                                                                                                                  |
-| 7   | **Vishruth** | Terminal, MCP server running, with a saved JSON-RPC input file ready to pipe in                                    | (see 1:45 below for the exact command)                                                                                                                                                                                                                    |
-| 8   | **You**      | Terminal, this repo checked out, ready to run `forge test --summary`                                               | (see 4:30 below)                                                                                                                                                                                                                                          |
-| 9   | **You**      | `https://github.com/SudeepGowda55/Aqueduct` (or the README rendered on GitHub)                                     | —                                                                                                                                                                                                                                                         |
+## What `./scripts/start_local.sh` does
 
-> Two more subgraph blocks exist but aren't tied to a specific beat below — Vishruth can paste
-> them into Tab 3 if you want extra Playground material to show while narrating:
-> `{ exposureSnapshots(first: 3) { id } }` and `{ liquidityPools(first: 3) { id } }` and
-> `{ swaps(first: 3) { id } }`.
->
-> WARNING: Studio queries fail on Explorer and Explorer queries fail on Studio — each query above
-> is pre-paired with the one tab it actually works on. Don't cross-paste them.
+Everything runs on a private copy of Base mainnet on your laptop. Nothing touches the real chain, and your real wallet isn't used.
 
----
+1. **Local Base fork.** Starts `anvil` from the latest Base block through your RPC, at `http://127.0.0.1:8555`. The real 1inch Aqua, 1inch official router, Uniswap v4 PoolManager and Morpho vaults are all there.
+2. **Test wallets.** Uses anvil's public test keys (fake money, only on the fork):
+   - the maker gets 20,000 USDC and 2 WETH, plus more for the v4 pool;
+   - three takers (demo script, UI buttons, terminal commands) get 50,000 USDC and 10 WETH each.
+3. **Price feed.** Chainlink doesn't update on a fork. A small `MirrorFeed` starts at the live Base Chainlink ETH/USD price, and the keeper keeps copying the live price into it.
+4. **Venue 1: 1inch Aqua.**
+   - Deploys `IcebergRouter`, the vault hooks, `IcebergParams` (λ settings) and `IcebergLens`.
+   - The maker deposits 2 WETH and the matching USDC into Morpho vaults, then ships the Iceberg strategy to Aqua.
+   - Also ships the small shared strategy on 1inch's official router.
+5. **Venue 2: Uniswap v4.**
+   - Mines a hook address with the right permission bits and deploys `IcebergHook` through the standard CREATE2 deployer.
+   - Creates the pool and adds 2 WETH plus matching USDC. The idle share is parked in Morpho.
+   - Takers approve the three contracts they trade through.
+   - All addresses go to `deployments/local.json`.
+6. **Keeper and UI.** Starts the keeper (log in `.run/keeper.log`) and the web app at `http://localhost:8788/`, with the API at `/api/status`.
 
-## 0:00–1:10 — Introduction + the problem (~68 sec, ~170 words)
+**READY** means you can open the UI. Both venues start with the same 2 WETH and matching USDC at the same price. That's why the two quotes in C1 match exactly.
 
-**[Tab 2 — the multiplier-effect diagram, full-screen — timed to land as you say "each one looks
-completely safe"]**
+## Before you hit record (15 min ahead)
 
-> **SAY:**
-> "Hi, I'm Sudeep, and along with my teammate Vishruth, we built Aqueduct.
->
-> So here's the thing — in DeFi, risk checks today only ever look at one strategy at a time, and
-> that's exactly where real exposure hides. Say a maker has a $100 wallet, and commits to three
-> separate strategies: $50, $40, $40. Checked alone, each one looks completely safe — 50%, 40%,
-> 40% utilization, comfortably under any sane threshold. But all three are checked against the
-> same full $100, as if the other two didn't exist. Add them up and that's $130 promised against
-> $100 that's actually there — thirty dollars that simply isn't real.
->
-> That gap stays hidden until demand hits all three strategies close together — whoever pulls
-> first drains the real balance, whoever's last just fails, and bots race each other the moment
-> they spot it. Three honestly-safe checks, and the maker's still over-committed by 30%. That's
-> the multiplier effect, and it's the actual problem Aqueduct solves. Let's see the fix running
-> for real."
-
----
-
-## 1:10–5:25 — Live execution, following the page top to bottom (4:15, ~620 words)
-
-**[Switch to Tab 1 — `aqueduct-protocol.vercel.app`, scrolled to the very top]**
-
-### 1:10–1:25 (15s) — "Why this maker is exposure-gated" panel → "Maker exposure" section with the Exposure Gauge, reading 10%
-
-> **SAY:**
-> "This is Aqueduct, live on Base Sepolia — nothing here is mocked. We added a new SwapVM
-> instruction, exposure-gate-one-D, that reads a maker's real aggregate exposure from an on-chain
-> oracle and derates or halts their fill. Right now this maker's exposure gauge reads 10% —
-> safe."
-
-### 1:25–1:45 (20s) — "Same strategy. Same risk policy. Different execution venue." — the "✓ EXACT MATCH — BIT-EXACT" badge already showing, no click needed
-
-> **SAY:**
-> "Scrolling down — here's the core claim, computed live: the same strategy backs two execution
-> venues, and the predicted output is bit-for-bit identical whether it fills through SwapVM or
-> through Uniswap v4. We'll prove that for real with actual swaps in a minute."
-
-### 1:45–2:20 (35s) — Tab 3 (Studio) → Tab 4 (Aave) → Tab 5 (Uniswap) → Tab 6 (Agent0) → Tab 1 (Graph panels) → Tab 7 (MCP)
-
-> **SAY (Tab 1, before cueing anyone):**
-> "All of this is backed by The Graph."
-
-**[Cue Vishruth → Tab 3 (Studio Playground) → he clicks Run on the pre-pasted
-`exposurePositions` query]**
-
-> **SAY (while his result is on screen):**
-> "Quick split: we built one subgraph ourselves — that's `ethonline` — it tracks this maker,
-> `0x5067...132be`, across ten positions and drives this safety banner live. Here's one, live
-> right now: 100k committed against a 1.39 million wallet, 1000 basis points, status SAFE —
-> that's the same 10% you just saw on the gauge."
-
-**[Cue Vishruth → Tab 4 (Aave Explorer) → he clicks Run]**
-
-> **SAY:**
-> "Then we compose with public subgraphs other teams maintain — Aave —"
-
-**[Cue Vishruth → Tab 5 (Uniswap Base Explorer) → he clicks Run]**
-
-> **SAY:**
-> "Uniswap —"
-
-**[Cue Vishruth → Tab 6 (Agent0 Base Explorer) → he clicks Run]**
-
-> **SAY:**
-> "and Agent0 — using the same Messari-standard shape, so the same query pattern that works on
-> ours works on theirs too."
-
-**[Back to you, Tab 1 → scroll past "Maker safety" → "Exposure, from The Graph" → "Pool activity,
-from The Graph (Messari shape)"]**
-
-> **SAY:**
-> "Below that, real exposure history and real indexed swaps,"
-
-**[Cue Vishruth → Tab 7 (his terminal) → he runs:**
-
+**1. Fresh stack**, so both venues start identical:
+```bash
+cd ~/projects/ethglobal-online/iceberg
+./scripts/stop_local.sh; ./scripts/start_local.sh      # wait for "READY" (~3 min)
 ```
-node mcp/server.js < saved-mcp-input.jsonl
+Any swap or rebalance moves each venue's reserves differently, and after that the two quotes won't match. So restart right before recording, and run C1 before any trade or rebalance.
+
+**2. Record two short proof clips first.** They take minutes to run, so don't do them live:
+```bash
+./scripts/test_all.sh              # record only the last ~15 lines ending in "ALL CHECKS PASSED."
+REPLAY_MINUTES=1440 forge test --match-contract Replay21Sep -vv   # record the 5 result lines
+```
+`test_all.sh` restarts the stack, so run step 1 again after it.
+
+**3. Screen layout** (1920×1080):
+- **Right half:** browser at `http://localhost:8788/`, zoomed to 90%, trade size box set to **10**.
+- **Left top terminal (live feed):** `cd ~/projects/ethglobal-online/iceberg/frontend && npm run watch`
+- **Left bottom terminal (commands):** `cd ~/projects/ethglobal-online/iceberg && clear`
+- **Extra tabs, ready:**
+  - VS Code at `contracts/iceberg/PAActiveReserves.sol` (the `exec` function) and `contracts/v4/IcebergHook.sol` (`_getUnspecifiedAmount`);
+  - the Sepolia Aqua fill: https://sepolia.etherscan.io/tx/0x321ee1482759a2393852a0b3b156bc6e65e3f897203297fe440baf296c4223b1
+
+**4. Paste-ready commands:**
+```bash
+# C1: same price on both venues
+for v in v4 aqua; do curl -s "localhost:8788/api/quote?venue=$v&side=buy&usd=10" | jq -r '"\(.venue): \(.amountOut) WETH"'; done
+# C2: real swap through the Uniswap v4 pool
+curl -s -X POST "localhost:8788/api/swap?venue=v4&side=buy&usd=10" | jq -r '.message, .tx'
+# C3: real fill on the 1inch Aqua position
+curl -s -X POST "localhost:8788/api/swap?venue=aqua&side=buy&usd=10" | jq -r '.message, .tx'
 ```
 
-**→ hold on the `maker_safety_verdict` response]**
+## The script
 
-> **SAY:**
-> "and over MCP an agent can just ask 'is this maker safe?' — no GraphQL, no fake numbers."
+| Time | Screen | Do | Say (voice-over) |
+|---|---|---|---|
+| **0:00–0:20** | UI, top of page | Slowly move the mouse over the headline, then the **19.3%** tile | "Every block, arbitrage bots take money from liquidity providers. A 2026 research paper, Partially Active AMMs, proposes letting only a fraction lambda of a pool trade in each block. We built it and called it **Iceberg**: only the tip is exposed, and the rest sits under water earning yield in Morpho." |
+| **0:20–0:45** | UI, **Venues** section | Point at the blue / grey / green bars on both cards, then the **1inch official router** card | "One kernel, two venues. A **1inch Aqua** position and a **Uniswap v4 hook**. Blue is what an arbitrageur can reach this block, grey is frozen, green is earning in Morpho. On Aqua, the maker holds only vault shares, so nothing leaves their wallet until a trade fills. The same balance even backs a strategy on 1inch's own official router." |
+| **0:45–1:05** | VS Code | Show `PAActiveReserves.exec` for 8 s, then `IcebergHook._getUnspecifiedAmount` for 8 s | "On 1inch it's a new SwapVM instruction on the official Aqua registry: on the first fill of a block it freezes the passive part, and 1inch's own curve trades only what's left. On Uniswap it's a hook on OpenZeppelin's custom-curve base, with the same math. The same trade gets the same price on both." |
+| **1:05–1:25** | UI, **Keeper** panel | Point at the sentence, then the green bar in the chart | "Lambda isn't fixed. A keeper replays the last six hours of **real ETH prices** at the pool's fee and picks the lambda that loses least. The paper assumes zero fees. We measured that at high fees partial activity stops helping, so the keeper opens the pool up to its 80% cap." |
+| **1:25–1:45** | Terminal (bottom) | Paste **C1** | "Same trade on both venues, from the API. Identical price." |
+| **1:45–2:10** | Terminal → UI → watch pane | Paste **C2**. Point at the **UI pop-up**, the feed row, then the watch pane | "A real swap through the Uniswap v4 pool on a Base mainnet fork. The UI sees it instantly: that block's split, lambda, and exactly how much was frozen. The terminal feed shows the same event." |
+| **2:10–2:30** | Terminal → UI | Paste **C3**. Point at the feed rows "withdrew… from its Morpho vault" and "proceeds… deposited back" | "Now 1inch Aqua. The fill withdrew exactly what it needed from the Morpho vault and put the proceeds straight back, in one transaction." |
+| **2:30–2:50** | UI → watch pane | Click **Buy on 1inch official router**, then point at the new line in the watch pane | "And the other direction: I click in the UI, and the terminal feed shows it. That's Aqua's shared liquidity, the same Morpho balance filling on 1inch's unmodified router." |
+| **2:50–3:10** | UI → watch pane | Click **Rebalance now**, then point at the watch pane lines: *retired → shipped → λ carried* | "A partially active pool lags the market, so its mix drifts. The keeper retires the strategy, rebalances through Uniswap and re-ships it balanced at the live price, without paying arbitrageurs to do it." |
+| **3:10–3:35** | UI, **Replay** panel, then the replay clip | Point at the bars, then cut 5 s to the recorded forge replay output | "The evidence: the real 24 hours of 21 September, replayed minute by minute against a **real plain Uniswap v4 pool**. Half active cut LP losses **17.6%**, lambda 39% cut them **19.3%**, and the Aqua position lost exactly the same as the hook. Anyone can rerun it with one command." |
+| **3:35–3:50** | `test_all` clip, then the Sepolia tab | Show "52 tests passed … ALL CHECKS PASSED", then the Etherscan transaction | "52 Solidity tests, including 1inch's own invariant suite, a 25-point end-to-end check, deployed and trading on Sepolia, and the Base mainnet run rehearsed with a real wallet." |
+| **3:50–4:00** | UI, **Limitations** section | Scroll to it and hold | "Honest limits: the gain depends on the fee, and fewer active reserves means worse prices for ordinary traders, which is why lambda has a floor. Iceberg: only the tip is exposed. Thanks." |
 
-### 2:20–2:50 (30s) — "Swap directly via SwapVM" / "Swap via Uniswap v4" row (both default to amount 1, already matching)
+## Recording tips
 
-> **SAY:**
-> "Now let's actually do it, for real. Swap directly through SwapVM — [click, wait for the
-> > confirmation toast] — real output, right there. Now the same size through the Uniswap v4 pool
-> sourced by our custom hook — [click, wait for the toast] — same output again. Genuinely
-> executed, not just predicted — because the v4 pool has zero liquidity of its own, every fill
-> comes from that same Aqua strategy."
-
-**[Click Swap on the SwapVM panel → hold one beat on the confirmation toast → click Swap on the
-Uniswap v4 panel → hold one beat on its toast → hold both toasts on screen together so the
-matching output numbers are readable side by side. If Base Sepolia confirmation is slow, cut on
-the toast rather than waiting live.]**
-
-### 2:50–3:25 (35s) — "Strategy P (price + risk aware)" / "Risk-adjusted dynamic fee (Uniswap v4)" row
-
-> **SAY:**
-> "This maker also runs a more sophisticated program, reading a real live Chainlink ETH/USD feed
-> to improve pricing, still gated by the same exposure check on top. And separately, a second,
-> independent Uniswap v4 mechanism: a swap fee that scales with this same live exposure. Here's
-> the predicted fee next to the persisted on-chain fee — I'll hit refresh — [click] — a real
-> transaction, no swap required."
-
-**[Point at the live Chainlink price, then click "Push current fee on-chain (refreshFee)" on the
-dynamic-fee panel]**
-
-### 3:25–3:40 (15s) — "Ungated vs. exposure-gated" panel
-
-This is a read-only panel — no wallet, no transaction, nothing for Vishruth to do. You just point
-at the two numbers that are already sitting on screen after the previous scroll.
-
-> **SAY:**
-> "One more comparison, and this one needs no wallet at all — both numbers come straight from
-> public reads. It prices the same 100-token swap two ways: what the raw pool curve alone would
-> pay out with no exposure gate, against what it actually pays out right now. At this maker's
-> current 10% exposure they're identical, because 10% is well under the derate threshold — the
-> gate only starts biting once exposure climbs, which is exactly what we're about to push it to."
-
-**[Point at the two output numbers side by side — "Ungated" and "Exposure-gated" — then the
-footer line underneath showing this maker's exposure percentage and committed amount for this
-strategy. No clicking needed; the toggle/amount field can stay at its default.]**
-
-### 3:40–4:05 (25s) — "Maker risk policy" / "Maker emergency halt" row
-
-> **SAY:**
-> "The maker also has an independent kill switch. [click "Pause (emergency halt)"] Now any fill
-> on either venue reverts with the exact expected error. [attempt swap, show revert] Unpausing
-> restores it immediately. [click "Unpause"]"
-
-### 4:05–4:25 (20s) — "Keeper control (demo)" / "Activity" row
-
-> **SAY:**
-> "Last piece: the keeper is what pushes real exposure readings on-chain. Let's push this maker
-> to 70%. [click]"
-
-**[Click the "Derated (70%)" preset button — the "Activity" panel shows the real transaction]**
-
-### 4:25–4:45 (20s) — Exposure Gauge (now "Derated") / "Swap directly via SwapVM" panel — the one deliberate callback
-
-> **SAY:**
-> "Scrolling back up for a second — the gauge already reads derated, and the exact same swap now
-> fills for noticeably less, automatically, because it's the same program reacting to the same
-> new reading. And if we scrolled back down to that comparison panel right now, the ungated and
-> gated numbers would finally split apart."
-
-**[Attempt one more swap, show the reduced output]**
-
-### 4:45–5:05 (20s) — Terminal (Tab 8), `forge test --summary`
-
-> **SAY:**
-> "And it's backed by real tests, not just a working demo. Forty-nine Foundry tests across ten
-> suites — including a stateful-fuzz invariant suite that ran 128,000 randomized calls checking
-> committed-balance accounting never drifts. All green."
-
-```
-forge test --summary
-```
-
-**[Let the passing suite table sit on screen for a beat before cutting away]**
-
-### 5:05–5:25 (20s) — Tab 9, README / GitHub repo page
-
-> **SAY:**
-> "Every number you've seen today is live on Base Sepolia, independently verifiable on-chain.
-> Full developer feedback for Uniswap is in our repo's `FEEDBACK.md`. One risk guarantee, two
-> execution venues, one live data layer connecting them. That's Aqueduct."
-
----
-
-## Production notes
-
-- Nobody should type a URL or paste a query live on camera — every tab in the checklist above is
-  opened and pre-loaded _before_ recording starts. Vishruth drives tabs 3–7 (the four Graph tabs
-  plus his MCP terminal) on his own screen when you cue him; you drive everything else (tabs 1,
-  2, 8, 9) yourself — that's the only live coordination needed for the whole video.
-- The swap transactions (2:20), the fee refresh (2:50), the pause/unpause (3:40), and the keeper
-  push (4:05) are the segments most likely to run long if a transaction confirmation is slow on
-  Base Sepolia — consider recording those in a separate take and cutting on the confirmation
-  toast rather than waiting live.
-- The "Ungated vs. exposure-gated" panel (3:25) is read-only and needs no wallet or transaction —
-  it's the one beat in the whole live-execution block where you can just talk and point, no
-  clicking, so use it as a breather between the fee-refresh click and the pause/unpause click.
-- The whole demo follows the page top to bottom in one pass, with exactly one deliberate
-  scroll-back-up at 4:25 to show the keeper push taking effect — that's intentional, not a
-  mistake, so call it out verbally ("scrolling back up for a second") rather than cutting to it
-  silently.
-- The Aave/Uniswap/Agent0 Explorer links (tabs 4–6) are public third-party subgraphs Vishruth
-  verified working on the day this script was written — give them one live check before
-  recording, since external subgraphs can change or move without our control.
-- Graph proof links for the submission description (verified live):
-  - Ours (owned): https://thegraph.com/studio/subgraph/ethonline/ — v0.4.0, deployed, Base
-    Sepolia, synced 100%, 330 entities.
-  - Maker on-chain activity: https://sepolia.basescan.org/txs?a=0x5067591c365d7d69d76b725c2d9af7b9437132be
-  - The multiplier-effect diagram: https://claude.ai/code/artifact/88d42e02-0470-45d5-bdcd-e4293fdf4081
+- **Order matters:** run **C1 before Rebalance now**. A rebalance changes the Aqua reserves, and the two prices would then differ slightly.
+- **Timing:** pop-ups take about 3 seconds to appear, so pause briefly after C2 and C3.
+- **Numbers on screen will differ** from the script (λ, prices, hashes follow the live market). Read them off the screen, and keep the replay percentages as scripted.
+- **If a command fails:** stop recording, run `./scripts/stop_local.sh && ./scripts/start_local.sh`, and retake that scene.
+- **Editing:** record the UI/terminal blocks as separate takes and cut them together. Splice in the code flash and proof clips afterwards.
+- **Fallback:** `cd frontend && PAUSE=1 npx tsx scripts/demo.ts` runs all 10 demo steps with a pause between each.
