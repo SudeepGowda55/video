@@ -6,6 +6,7 @@
 |---|---|---|
 | **AMM** | Automated Market Maker. A smart contract that holds a pool of two tokens (here ETH and USDC) and trades with anyone directly, pricing by a formula. Uniswap is one, and a 1inch Aqua strategy works the same way. | "A-M-M" |
 | **Partially Active AMM** | Only part of the pool can trade in each block. The rest is frozen for that block and earns yield in Morpho. From the paper arXiv 2602.09887 (Ko, 2026). | |
+| **LVR** | Loss-versus-rebalancing: what an LP loses because arbitrage bots trade against the pool's stale price (Milionis et al., 2022). | "L-V-R" |
 | **λ** | Greek letter lambda: the fraction of the pool that can trade this block. "λ is 80%" means 80% can trade. | "LAM-duh" (silent b) |
 | **Venue** | A place where traders swap against Iceberg's liquidity. There are two, running the same math. | |
 | **Venue 1: 1inch Aqua** | The maker ships a strategy to 1inch Aqua. Takers swap through `IcebergRouter`, where a new SwapVM instruction (`PAActiveReserves`) freezes the passive part each block. | |
@@ -73,11 +74,11 @@ curl -s -X POST "localhost:8788/api/swap?venue=aqua&side=buy&usd=10" | jq -r '.m
 
 ## The script
 
-Plain words throughout: say it the way you'd explain it to a friend who doesn't know crypto.
+The opening states the problem in proper terms. Everything after it is in plain words: say it the way you'd explain it to a friend who doesn't know crypto.
 
 | Time | Screen | Do | Say (voice-over) |
 |---|---|---|---|
-| **0:00–0:25** | UI, top of page | Move the mouse over the headline, then the **19.3%** tile | "When you put money into a crypto trading pool, fast bots quietly take some of it. The real price moves, the pool's price is a moment behind, and bots trade against the old price. Their profit is your loss. I built **Iceberg** to shrink that loss." |
+| **0:00–0:25** | UI, top of page | Move the mouse over the headline, then the **19.3%** tile | "Automated market makers like Uniswap hold billions for liquidity providers. But a pool's price only moves when someone trades against it. Every time ETH moves on Binance or Coinbase, the pool is stale for a moment, and arbitrage bots race to trade against the old price. Researchers call this **loss-versus-rebalancing**, or LVR: a hidden cost on every pool, every block, that can eat much of what LPs earn in fees. I built **Iceberg** to shrink it." |
 | **0:25–0:50** | UI, **Venues** section | Point at the blue, grey and green bars on the Uniswap card, then the 1inch card | "The idea comes from a 2026 research paper: don't put all your money on the counter. **Blue** is the part that can trade right now. **Grey** is locked for this block. **Green** sits in Morpho, a savings vault, earning interest. Like an iceberg, only the tip is exposed. It works the same on **Uniswap** and on **1inch**, the two biggest places people swap crypto." |
 | **0:50–1:05** | VS Code | Show `PAActiveReserves.exec` for 6 s, then `IcebergHook._getUnspecifiedAmount` for 6 s | "On 1inch, it's a new instruction for their trading engine. On Uniswap, it's a hook. Same math in both." |
 | **1:05–1:25** | UI, **Keeper** panel | Point at the "Why λ = …" sentence | "How much goes on the counter? A small assistant, the keeper, decides every 20 seconds. It looks at how wild prices were over the last six hours. Wild market: lock more. Calm market: put more out, up to 80%. Never below 10%, so normal traders can always trade." |
